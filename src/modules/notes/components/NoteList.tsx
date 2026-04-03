@@ -1,9 +1,8 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { Pin, Search } from 'lucide-react'
+import { Pin, Search, Loader2 } from 'lucide-react'
 
-import { cn } from '@/lib/utils'
 import { notesQueryOptions } from '@/modules/notes/queries/note.queries'
 import { useNoteStore } from '@/modules/notes/store/note-store'
 import type { Note } from '@/modules/notes/types/note.types'
@@ -11,14 +10,12 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 
 function formatDate(dateStr: string) {
   const date = new Date(dateStr)
-  return date.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-  })
+  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
 }
 
 function getPreview(content: string): string {
-  const firstLine = content.split('\n').find((line) => line.trim() !== '')
+  const stripped = content.replace(/<[^>]*>/g, '')
+  const firstLine = stripped.split('\n').find((line) => line.trim() !== '')
   if (!firstLine) return ''
   return firstLine.slice(0, 80)
 }
@@ -31,62 +28,29 @@ function NoteItem({ note }: { note: Note }) {
     <button
       type="button"
       onClick={() => selectNote(note.id)}
-      className={cn(
-        'flex w-full flex-col gap-1 px-3 py-2 text-left transition-colors',
-      )}
-      style={{
-        borderBottom: '0.5px solid var(--color-border-app)',
-        backgroundColor: isSelected ? 'var(--color-accent-bg)' : 'transparent',
-        borderRadius: 'var(--radius-sm)',
-      }}
+      className={`note-list__item ${isSelected ? 'note-list__item--active' : ''}`}
     >
-      <div className="flex items-center gap-1.5">
+      <div className="note-list__item-header">
         {note.is_pinned && (
-          <Pin
-            size={12}
-            strokeWidth={1.5}
-            style={{ color: 'var(--color-accent-text)', flexShrink: 0 }}
-          />
+          <Pin size={12} strokeWidth={1.5} className="note-list__pin-icon" />
         )}
-        <span
-          className="truncate"
-          style={{
-            fontSize: '14px',
-            fontWeight: 500,
-            color: 'var(--color-text)',
-          }}
-        >
-          {note.title}
-        </span>
+        <span className="note-list__item-title truncate">{note.title}</span>
       </div>
-      <div className="flex items-center gap-2">
-        <span
-          className="truncate"
-          style={{
-            fontSize: '12px',
-            fontWeight: 400,
-            color: 'var(--color-text-2)',
-          }}
-        >
+      {getPreview(note.content) && (
+        <span className="note-list__item-preview truncate">
           {getPreview(note.content)}
         </span>
-      </div>
-      <span
-        style={{
-          fontSize: '11px',
-          fontWeight: 400,
-          color: 'var(--color-text-3)',
-        }}
-      >
-        {formatDate(note.updated_at)}
-      </span>
+      )}
+      <span className="note-list__item-date">{formatDate(note.updated_at)}</span>
     </button>
   )
 }
 
 export function NoteList() {
   const { selectedFolderId, searchQuery, setSearchQuery } = useNoteStore()
-  const { data: result } = useQuery(notesQueryOptions(selectedFolderId))
+  const { data: result, isLoading, isFetching } = useQuery(
+    notesQueryOptions(selectedFolderId),
+  )
 
   const notes = result?.success ? result.data : []
 
@@ -103,51 +67,28 @@ export function NoteList() {
   const sortedNotes = [...pinnedNotes, ...unpinnedNotes]
 
   return (
-    <div
-      className="flex flex-col"
-      style={{
-        width: '240px',
-        minWidth: '240px',
-        borderRight: '0.5px solid var(--color-border-app)',
-        backgroundColor: 'var(--color-bg)',
-      }}
-    >
-      <div
-        className="flex items-center gap-1.5 px-3 py-2"
-        style={{
-          borderBottom: '0.5px solid var(--color-border-app)',
-        }}
-      >
-        <Search
-          size={14}
-          strokeWidth={1.5}
-          style={{ color: 'var(--color-text-3)', flexShrink: 0 }}
-        />
+    <div className="note-list">
+      <div className="note-list__search">
+        <Search size={14} strokeWidth={1.5} className="note-list__search-icon" />
         <input
           type="text"
           placeholder="Buscar notas..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full border-none bg-transparent outline-none"
-          style={{
-            fontSize: '13px',
-            fontWeight: 400,
-            color: 'var(--color-text)',
-          }}
+          className="note-list__search-input"
         />
+        {isFetching && !isLoading && (
+          <Loader2 size={14} strokeWidth={1.5} className="note-list__spinner" />
+        )}
       </div>
       <ScrollArea className="flex-1">
-        {sortedNotes.length === 0 ? (
-          <div
-            className="px-3 py-4 text-center"
-            style={{
-              fontSize: '12px',
-              fontWeight: 400,
-              color: 'var(--color-text-3)',
-            }}
-          >
-            Nenhuma nota encontrada
+        {isLoading ? (
+          <div className="note-list__status">
+            <Loader2 size={16} strokeWidth={1.5} className="note-list__spinner" />
+            Carregando notas...
           </div>
+        ) : sortedNotes.length === 0 ? (
+          <div className="note-list__empty">Nenhuma nota encontrada</div>
         ) : (
           sortedNotes.map((note) => <NoteItem key={note.id} note={note} />)
         )}

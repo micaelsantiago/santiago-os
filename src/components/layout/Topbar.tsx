@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { useCallback } from 'react'
+import { Button } from '@/components/ui/button'
 
 const sectionLabels: Record<string, string> = {
   '/tasks': 'Tarefas',
@@ -33,75 +34,17 @@ export function Topbar({ onOpenCommandPalette }: TopbarProps) {
   }, [])
 
   return (
-    <header
-      className="flex items-center justify-between px-4"
-      style={{
-        height: 'var(--topbar-height)',
-        minHeight: 'var(--topbar-height)',
-        backgroundColor: 'var(--color-bg)',
-        borderBottom: '0.5px solid var(--color-border-app)',
-      }}
-    >
-      <span
-        style={{
-          fontSize: 13,
-          fontWeight: 500,
-          color: 'var(--color-text)',
-        }}
-      >
-        {label}
-      </span>
-
-      <button
+    <header className="topbar">
+      <span className="topbar__title">{label}</span>
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={onOpenCommandPalette}
-        className="flex items-center gap-1.5"
-        style={{
-          fontSize: 11,
-          fontWeight: 400,
-          color: 'var(--color-text-3)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: '4px 8px',
-          borderRadius: 'var(--radius-sm)',
-          transition: 'color 150ms ease',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.color = 'var(--color-text-2)'
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.color = 'var(--color-text-3)'
-        }}
+        className="topbar__shortcut"
       >
-        <kbd
-          style={{
-            fontSize: 11,
-            fontFamily: 'var(--font)',
-            color: 'inherit',
-            padding: '1px 4px',
-            borderRadius: 'var(--radius-sm)',
-            border: '0.5px solid var(--color-border-app)',
-            backgroundColor: 'var(--color-bg-2)',
-          }}
-        >
-          {isMac() ? '\u2318' : 'Ctrl'}
-        </kbd>
-        <kbd
-          style={{
-            fontSize: 11,
-            fontFamily: 'var(--font)',
-            color: 'inherit',
-            padding: '1px 4px',
-            borderRadius: 'var(--radius-sm)',
-            border: '0.5px solid var(--color-border-app)',
-            backgroundColor: 'var(--color-bg-2)',
-          }}
-        >
-          K
-        </kbd>
-      </button>
+        <kbd className="topbar__kbd">{isMac() ? '\u2318' : 'Ctrl'}</kbd>
+        <kbd className="topbar__kbd">K</kbd>
+      </Button>
     </header>
   )
 }

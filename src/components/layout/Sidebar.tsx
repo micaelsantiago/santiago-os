@@ -11,6 +11,12 @@ import {
   Bot,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface NavItem {
   href: string
@@ -31,49 +37,31 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside
-      className="flex flex-col items-center gap-1 pt-2"
-      style={{
-        width: 'var(--sidebar-width)',
-        minWidth: 'var(--sidebar-width)',
-        height: '100vh',
-        backgroundColor: 'var(--color-bg)',
-        borderRight: '0.5px solid var(--color-border-app)',
-      }}
-    >
-      {navItems.map((item) => {
-        const isActive = pathname.startsWith(item.href)
-        const Icon = item.icon
+    <TooltipProvider delay={300}>
+      <aside className="sidebar">
+        {navItems.map((item) => {
+          const isActive = pathname.startsWith(item.href)
+          const Icon = item.icon
 
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            title={item.label}
-            className="flex items-center justify-center"
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 'var(--radius)',
-              backgroundColor: isActive ? 'var(--color-accent-bg)' : 'transparent',
-              color: isActive ? 'var(--color-accent-text)' : 'var(--color-text-3)',
-              transition: 'background-color 150ms ease, color 150ms ease',
-            }}
-            onMouseEnter={(e) => {
-              if (!isActive) {
-                e.currentTarget.style.color = 'var(--color-text-2)'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isActive) {
-                e.currentTarget.style.color = 'var(--color-text-3)'
-              }
-            }}
-          >
-            <Icon size={16} strokeWidth={1.5} />
-          </Link>
-        )
-      })}
-    </aside>
+          return (
+            <Tooltip key={item.href}>
+              <TooltipTrigger
+                render={
+                  <Link
+                    href={item.href}
+                    className={`sidebar__link ${isActive ? 'sidebar__link--active' : ''}`}
+                  />
+                }
+              >
+                <Icon size={16} strokeWidth={1.5} />
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={8}>
+                {item.label}
+              </TooltipContent>
+            </Tooltip>
+          )
+        })}
+      </aside>
+    </TooltipProvider>
   )
 }

@@ -9,17 +9,11 @@ import { NoteToolbar } from '@/modules/notes/components/NoteToolbar'
 export function NotesPageClient() {
   return (
     <QueryProvider>
-      <div
-        className="flex h-full"
-        style={{
-          margin: '-16px',
-          height: 'calc(100% + 32px)',
-        }}
-      >
+      <div className="notes-page">
         <NoteSidebar />
-        <div className="flex flex-1 flex-col">
+        <div className="notes-page__main">
           <NoteToolbar />
-          <div className="flex flex-1 overflow-hidden">
+          <div className="notes-page__content">
             <NoteList />
             <NoteEditor />
           </div>

@@ -1,10 +1,9 @@
 'use client'
 
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { FileText, FolderPlus, Folder } from 'lucide-react'
+import { FileText, FolderPlus, Folder, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 
-import { cn } from '@/lib/utils'
 import { foldersQueryOptions } from '@/modules/notes/queries/note.queries'
 import { createFolder } from '@/modules/notes/actions/note.actions'
 import { useNoteStore } from '@/modules/notes/store/note-store'
@@ -13,10 +12,11 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 export function NoteSidebar() {
   const { selectedFolderId, selectFolder } = useNoteStore()
   const queryClient = useQueryClient()
-  const { data: result } = useQuery(foldersQueryOptions())
+  const { data: result, isLoading } = useQuery(foldersQueryOptions())
   const folders = result?.success ? result.data : []
 
   const [isCreating, setIsCreating] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [newFolderTitle, setNewFolderTitle] = useState('')
 
   const handleCreateFolder = async () => {
@@ -24,16 +24,16 @@ export function NoteSidebar() {
       setIsCreating(false)
       return
     }
+    setIsSaving(true)
     await createFolder({ title: newFolderTitle.trim(), parent_id: null })
-    queryClient.invalidateQueries({ queryKey: ['note-folders'] })
+    await queryClient.invalidateQueries({ queryKey: ['note-folders'] })
     setNewFolderTitle('')
     setIsCreating(false)
+    setIsSaving(false)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleCreateFolder()
-    }
+    if (e.key === 'Enter') handleCreateFolder()
     if (e.key === 'Escape') {
       setIsCreating(false)
       setNewFolderTitle('')
@@ -41,118 +41,78 @@ export function NoteSidebar() {
   }
 
   return (
-    <div
-      className="flex flex-col"
-      style={{
-        width: '180px',
-        minWidth: '180px',
-        borderRight: '0.5px solid var(--color-border-app)',
-        backgroundColor: 'var(--color-bg-2)',
-      }}
-    >
-      <div
-        className="flex items-center justify-between px-3 py-2"
-        style={{
-          borderBottom: '0.5px solid var(--color-border-app)',
-        }}
-      >
-        <span
-          style={{
-            fontSize: '11px',
-            fontWeight: 500,
-            color: 'var(--color-text-3)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-          }}
-        >
-          Pastas
-        </span>
+    <div className="note-sidebar">
+      <div className="note-sidebar__header">
+        <span className="note-sidebar__label">Pastas</span>
         <button
           type="button"
           onClick={() => setIsCreating(true)}
-          className="flex items-center justify-center"
-          style={{
-            color: 'var(--color-text-3)',
-            transition: 'color 150ms ease',
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.color = 'var(--color-text)')
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.color = 'var(--color-text-3)')
-          }
+          className="note-sidebar__add-btn"
+          disabled={isSaving}
         >
-          <FolderPlus size={16} strokeWidth={1.5} />
+          {isSaving ? (
+            <Loader2 size={16} strokeWidth={1.5} className="note-sidebar__spinner" />
+          ) : (
+            <FolderPlus size={16} strokeWidth={1.5} />
+          )}
         </button>
       </div>
 
       <ScrollArea className="flex-1">
-        <button
-          type="button"
-          onClick={() => selectFolder(null)}
-          className={cn('flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors')}
-          style={{
-            fontSize: '13px',
-            fontWeight: 400,
-            color:
-              selectedFolderId === null
-                ? 'var(--color-accent-text)'
-                : 'var(--color-text)',
-            backgroundColor:
-              selectedFolderId === null
-                ? 'var(--color-accent-bg)'
-                : 'transparent',
-          }}
-        >
-          <FileText size={16} strokeWidth={1.5} />
-          <span>Todas as notas</span>
-        </button>
+        <div className="note-sidebar__list">
+          {isLoading ? (
+            <div className="note-sidebar__status">
+              <Loader2 size={14} strokeWidth={1.5} className="note-sidebar__spinner" />
+              Carregando...
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => selectFolder(null)}
+                className={`note-sidebar__item ${selectedFolderId === null ? 'note-sidebar__item--active' : ''}`}
+              >
+                <FileText size={16} strokeWidth={1.5} />
+                <span>Todas as notas</span>
+              </button>
 
-        {folders.map((folder) => (
-          <button
-            type="button"
-            key={folder.id}
-            onClick={() => selectFolder(folder.id)}
-            className={cn(
-              'flex w-full items-center gap-2 px-3 py-1.5 text-left transition-colors',
-            )}
-            style={{
-              fontSize: '13px',
-              fontWeight: 400,
-              color:
-                selectedFolderId === folder.id
-                  ? 'var(--color-accent-text)'
-                  : 'var(--color-text)',
-              backgroundColor:
-                selectedFolderId === folder.id
-                  ? 'var(--color-accent-bg)'
-                  : 'transparent',
-            }}
-          >
-            <Folder size={16} strokeWidth={1.5} />
-            <span className="truncate">{folder.title}</span>
-          </button>
-        ))}
+              {folders.map((folder) => (
+                <button
+                  type="button"
+                  key={folder.id}
+                  onClick={() => selectFolder(folder.id)}
+                  className={`note-sidebar__item ${selectedFolderId === folder.id ? 'note-sidebar__item--active' : ''}`}
+                >
+                  <Folder size={16} strokeWidth={1.5} />
+                  <span className="truncate">{folder.title}</span>
+                </button>
+              ))}
+            </>
+          )}
 
-        {isCreating && (
-          <div className="px-3 py-1.5">
-            <input
-              type="text"
-              value={newFolderTitle}
-              onChange={(e) => setNewFolderTitle(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onBlur={handleCreateFolder}
-              placeholder="Nome da pasta"
-              autoFocus
-              className="w-full border-none bg-transparent outline-none"
-              style={{
-                fontSize: '13px',
-                fontWeight: 400,
-                color: 'var(--color-text)',
-              }}
-            />
-          </div>
-        )}
+          {isCreating && (
+            <div className="note-sidebar__item">
+              <input
+                type="text"
+                value={newFolderTitle}
+                onChange={(e) => setNewFolderTitle(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onBlur={handleCreateFolder}
+                placeholder="Nome da pasta"
+                autoFocus
+                disabled={isSaving}
+                className="note-sidebar__input"
+              />
+            </div>
+          )}
+
+          {isSaving && (
+            <div className="note-sidebar__status">
+              <Loader2 size={14} strokeWidth={1.5} className="note-sidebar__spinner" />
+              Criando pasta...
+            </div>
+          )}
+        </div>
       </ScrollArea>
     </div>
   )

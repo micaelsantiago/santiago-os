@@ -1,9 +1,10 @@
 'use client'
 
-import { useQueryClient } from '@tanstack/react-query'
-import { Pin, PinOff, Plus, Trash2 } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
+import { useQueryClient, useQuery } from '@tanstack/react-query'
+import { Pin, PinOff, Plus, Trash2, Loader2 } from 'lucide-react'
+import { useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { noteQueryOptions } from '@/modules/notes/queries/note.queries'
 import {
   createNote,
@@ -15,113 +16,104 @@ import { useNoteStore } from '@/modules/notes/store/note-store'
 export function NoteToolbar() {
   const { selectedNoteId, selectedFolderId, selectNote } = useNoteStore()
   const queryClient = useQueryClient()
-  const { data: result } = useQuery(
-    noteQueryOptions(selectedNoteId ?? ''),
-  )
+  const { data: result } = useQuery(noteQueryOptions(selectedNoteId ?? ''))
   const note = result?.success ? result.data : null
 
+  const [creating, setCreating] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [pinning, setPinning] = useState(false)
+
   const handleCreate = async () => {
+    setCreating(true)
     const res = await createNote({
       title: 'Sem título',
       content: '',
       folder_id: selectedFolderId,
     })
-    if (res.success && res.data) {
-      selectNote(res.data.id)
-    }
-    queryClient.invalidateQueries({ queryKey: ['notes'] })
+    if (res.success && res.data) selectNote(res.data.id)
+    await queryClient.invalidateQueries({ queryKey: ['notes'] })
+    setCreating(false)
   }
 
   const handleDelete = async () => {
     if (!selectedNoteId) return
+    setDeleting(true)
     await deleteNote(selectedNoteId)
     selectNote(null)
-    queryClient.invalidateQueries({ queryKey: ['notes'] })
+    await queryClient.invalidateQueries({ queryKey: ['notes'] })
+    setDeleting(false)
   }
 
   const handleTogglePin = async () => {
     if (!selectedNoteId || !note) return
+    setPinning(true)
     await updateNote(selectedNoteId, { is_pinned: !note.is_pinned })
-    queryClient.invalidateQueries({ queryKey: ['notes'] })
+    await queryClient.invalidateQueries({ queryKey: ['notes'] })
+    setPinning(false)
   }
 
+  const statusText = creating
+    ? 'Criando nota...'
+    : deleting
+      ? 'Deletando nota...'
+      : pinning
+        ? 'Atualizando...'
+        : null
+
   return (
-    <div
-      className="flex items-center gap-1 px-2"
-      style={{
-        height: '36px',
-        borderBottom: '0.5px solid var(--color-border-app)',
-        backgroundColor: 'var(--color-bg)',
-      }}
-    >
-      <button
-        type="button"
+    <div className="note-toolbar">
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={handleCreate}
         title="Nova nota"
-        className="flex items-center justify-center rounded p-1 transition-colors"
-        style={{
-          color: 'var(--color-text-2)',
-          borderRadius: 'var(--radius-sm)',
-        }}
-        onMouseEnter={(e) =>
-          (e.currentTarget.style.backgroundColor = 'var(--color-bg-2)')
-        }
-        onMouseLeave={(e) =>
-          (e.currentTarget.style.backgroundColor = 'transparent')
-        }
+        disabled={creating}
+        className="note-toolbar__btn"
       >
-        <Plus size={16} strokeWidth={1.5} />
-      </button>
+        {creating ? (
+          <Loader2 size={16} strokeWidth={1.5} className="note-toolbar__spinner" />
+        ) : (
+          <Plus size={16} strokeWidth={1.5} />
+        )}
+      </Button>
 
       {selectedNoteId && (
         <>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleTogglePin}
             title={note?.is_pinned ? 'Desafixar' : 'Fixar'}
-            className="flex items-center justify-center rounded p-1 transition-colors"
-            style={{
-              color: note?.is_pinned
-                ? 'var(--color-accent-text)'
-                : 'var(--color-text-2)',
-              borderRadius: 'var(--radius-sm)',
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = 'var(--color-bg-2)')
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = 'transparent')
-            }
+            disabled={pinning}
+            className={`note-toolbar__btn ${note?.is_pinned ? 'note-toolbar__btn--pinned' : ''}`}
           >
-            {note?.is_pinned ? (
+            {pinning ? (
+              <Loader2 size={16} strokeWidth={1.5} className="note-toolbar__spinner" />
+            ) : note?.is_pinned ? (
               <PinOff size={16} strokeWidth={1.5} />
             ) : (
               <Pin size={16} strokeWidth={1.5} />
             )}
-          </button>
+          </Button>
 
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleDelete}
             title="Deletar nota"
-            className="flex items-center justify-center rounded p-1 transition-colors"
-            style={{
-              color: 'var(--color-text-2)',
-              borderRadius: 'var(--radius-sm)',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--color-danger-bg)'
-              e.currentTarget.style.color = 'var(--color-danger)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.color = 'var(--color-text-2)'
-            }}
+            disabled={deleting}
+            className="note-toolbar__btn note-toolbar__btn--danger"
           >
-            <Trash2 size={16} strokeWidth={1.5} />
-          </button>
+            {deleting ? (
+              <Loader2 size={16} strokeWidth={1.5} className="note-toolbar__spinner" />
+            ) : (
+              <Trash2 size={16} strokeWidth={1.5} />
+            )}
+          </Button>
         </>
       )}
+
+      {statusText && <span className="note-toolbar__status">{statusText}</span>}
     </div>
   )
 }

@@ -41,7 +41,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         onOpenChange(false)
       }
     },
-    [open, onOpenChange]
+    [open, onOpenChange],
   )
 
   useEffect(() => {
@@ -54,88 +54,67 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       router.push(href)
       onOpenChange(false)
     },
-    [router, onOpenChange]
+    [router, onOpenChange],
   )
 
   if (!open) return null
 
   return (
     <div
-      className="fixed inset-0 z-50 flex justify-center"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+      className="palette__overlay"
       onClick={(e) => {
         if (e.target === e.currentTarget) onOpenChange(false)
       }}
     >
-      <div
-        style={{
-          width: 480,
-          marginTop: 80,
-          height: 'fit-content',
-        }}
-      >
-        <Command
-          className="border"
-          style={{
-            backgroundColor: 'var(--color-bg)',
-            borderColor: 'var(--color-border-app)',
-            borderWidth: '0.5px',
-            borderRadius: 'var(--radius-lg)',
-            boxShadow: '0 16px 48px rgba(0, 0, 0, 0.12)',
-          }}
-        >
+      <div className="palette__container">
+        <Command className="palette__command">
           <CommandInput placeholder="Buscar comando..." />
-          <CommandList>
-            <CommandEmpty
-              style={{
-                fontSize: 13,
-                color: 'var(--color-text-3)',
-              }}
-            >
+          <CommandList className="palette__list">
+            <CommandEmpty className="palette__empty">
               Nenhum resultado encontrado.
             </CommandEmpty>
 
-            <CommandGroup heading="Navegar">
-              <CommandItem onSelect={() => navigate('/tasks')}>
+            <CommandGroup heading="Navegar" className="palette__group">
+              <CommandItem onSelect={() => navigate('/tasks')} className="palette__item">
                 <CheckSquare size={16} strokeWidth={1.5} />
-                <span style={{ fontSize: 13 }}>Tarefas</span>
+                <span>Tarefas</span>
                 <CommandShortcut>T</CommandShortcut>
               </CommandItem>
-              <CommandItem onSelect={() => navigate('/calendar')}>
+              <CommandItem onSelect={() => navigate('/calendar')} className="palette__item">
                 <Calendar size={16} strokeWidth={1.5} />
-                <span style={{ fontSize: 13 }}>Calendário</span>
+                <span>Calendário</span>
                 <CommandShortcut>C</CommandShortcut>
               </CommandItem>
-              <CommandItem onSelect={() => navigate('/projects')}>
+              <CommandItem onSelect={() => navigate('/projects')} className="palette__item">
                 <FolderKanban size={16} strokeWidth={1.5} />
-                <span style={{ fontSize: 13 }}>Projetos</span>
+                <span>Projetos</span>
                 <CommandShortcut>P</CommandShortcut>
               </CommandItem>
-              <CommandItem onSelect={() => navigate('/notes')}>
+              <CommandItem onSelect={() => navigate('/notes')} className="palette__item">
                 <FileText size={16} strokeWidth={1.5} />
-                <span style={{ fontSize: 13 }}>Notas</span>
+                <span>Notas</span>
                 <CommandShortcut>N</CommandShortcut>
               </CommandItem>
-              <CommandItem onSelect={() => navigate('/email')}>
+              <CommandItem onSelect={() => navigate('/email')} className="palette__item">
                 <Mail size={16} strokeWidth={1.5} />
-                <span style={{ fontSize: 13 }}>Email</span>
+                <span>Email</span>
                 <CommandShortcut>E</CommandShortcut>
               </CommandItem>
-              <CommandItem onSelect={() => navigate('/agent')}>
+              <CommandItem onSelect={() => navigate('/agent')} className="palette__item">
                 <Bot size={16} strokeWidth={1.5} />
-                <span style={{ fontSize: 13 }}>Agente</span>
+                <span>Agente</span>
                 <CommandShortcut>A</CommandShortcut>
               </CommandItem>
             </CommandGroup>
 
-            <CommandGroup heading="Criar">
-              <CommandItem onSelect={() => navigate('/tasks?create=true')}>
+            <CommandGroup heading="Criar" className="palette__group">
+              <CommandItem onSelect={() => navigate('/tasks?create=true')} className="palette__item">
                 <Plus size={16} strokeWidth={1.5} />
-                <span style={{ fontSize: 13 }}>Nova tarefa</span>
+                <span>Nova tarefa</span>
               </CommandItem>
-              <CommandItem onSelect={() => navigate('/notes?create=true')}>
+              <CommandItem onSelect={() => navigate('/notes?create=true')} className="palette__item">
                 <StickyNote size={16} strokeWidth={1.5} />
-                <span style={{ fontSize: 13 }}>Nova nota</span>
+                <span>Nova nota</span>
               </CommandItem>
             </CommandGroup>
           </CommandList>
