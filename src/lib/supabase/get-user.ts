@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
-import { createServerClient } from './server'
+import { createClient } from './server'
 
 export async function getAuthenticatedUser() {
-  const supabase = await createServerClient()
+  const supabase = await createClient()
   const {
     data: { user },
     error,

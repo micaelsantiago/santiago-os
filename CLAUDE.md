@@ -561,7 +561,7 @@ export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
     { cookies: {
         getAll: () => request.cookies.getAll(),
         setAll: (c) => c.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
@@ -741,7 +741,7 @@ supabase gen types typescript --local > src/lib/supabase/database.types.ts
 ```env
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ANTHROPIC_API_KEY=
 GOOGLE_CLIENT_ID=
