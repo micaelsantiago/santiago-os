@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
 
 import { getAuthenticatedUser } from '@/lib/supabase/get-user'
 import {
@@ -10,6 +11,8 @@ import {
   updateColumnSchema,
   updateTaskSchema,
 } from '@/modules/tasks/types/task.types'
+
+const uuidParam = z.string().uuid()
 import type {
   Board,
   Column,
@@ -71,6 +74,7 @@ export async function getOrCreateDefaultBoard() {
 // ========================================
 
 export async function getColumns(boardId: string) {
+  if (!uuidParam.safeParse(boardId).success) return { error: 'ID inválido' }
   const { supabase, user } = await getAuthenticatedUser()
 
   const { data, error } = await supabase
@@ -101,6 +105,7 @@ export async function createColumn(input: CreateColumnInput) {
 }
 
 export async function updateColumn(id: string, input: UpdateColumnInput) {
+  if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
   const { supabase, user } = await getAuthenticatedUser()
   const parsed = updateColumnSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten() }
@@ -119,6 +124,7 @@ export async function updateColumn(id: string, input: UpdateColumnInput) {
 }
 
 export async function deleteColumn(id: string) {
+  if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
   const { supabase, user } = await getAuthenticatedUser()
 
   const { error } = await supabase.from('columns').delete().eq('id', id).eq('user_id', user.id)
@@ -133,6 +139,7 @@ export async function deleteColumn(id: string) {
 // ========================================
 
 export async function getBoardTasks(boardId: string) {
+  if (!uuidParam.safeParse(boardId).success) return { error: 'ID inválido' }
   const { supabase, user } = await getAuthenticatedUser()
 
   // Buscar todas tasks do board via columns
@@ -187,6 +194,7 @@ export async function createTask(input: CreateTaskInput) {
 }
 
 export async function updateTask(id: string, input: UpdateTaskInput) {
+  if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
   const { supabase, user } = await getAuthenticatedUser()
   const parsed = updateTaskSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten() }
@@ -205,6 +213,7 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
 }
 
 export async function deleteTask(id: string) {
+  if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
   const { supabase, user } = await getAuthenticatedUser()
 
   const { error } = await supabase.from('tasks').delete().eq('id', id).eq('user_id', user.id)
@@ -220,6 +229,16 @@ export async function moveTask(input: MoveTaskInput) {
   if (!parsed.success) return { error: parsed.error.flatten() }
 
   const { taskId, columnId, position } = parsed.data
+
+  // Verificar que a coluna destino pertence ao usuário
+  const { data: column } = await supabase
+    .from('columns')
+    .select('id')
+    .eq('id', columnId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!column) return { error: 'Coluna não encontrada' }
 
   const { error } = await supabase
     .from('tasks')
@@ -237,7 +256,18 @@ export async function moveTask(input: MoveTaskInput) {
 // ========================================
 
 export async function addTaskTag(taskId: string, tag: string) {
-  const { supabase } = await getAuthenticatedUser()
+  if (!uuidParam.safeParse(taskId).success) return { error: 'ID inválido' }
+  const { supabase, user } = await getAuthenticatedUser()
+
+  // Verificar ownership da task antes de adicionar tag
+  const { data: task } = await supabase
+    .from('tasks')
+    .select('id')
+    .eq('id', taskId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!task) return { error: 'Tarefa não encontrada' }
 
   const { error } = await supabase.from('task_tags').insert({ task_id: taskId, tag })
 
@@ -247,7 +277,18 @@ export async function addTaskTag(taskId: string, tag: string) {
 }
 
 export async function removeTaskTag(taskId: string, tag: string) {
-  const { supabase } = await getAuthenticatedUser()
+  if (!uuidParam.safeParse(taskId).success) return { error: 'ID inválido' }
+  const { supabase, user } = await getAuthenticatedUser()
+
+  // Verificar ownership da task antes de remover tag
+  const { data: task } = await supabase
+    .from('tasks')
+    .select('id')
+    .eq('id', taskId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!task) return { error: 'Tarefa não encontrada' }
 
   const { error } = await supabase.from('task_tags').delete().eq('task_id', taskId).eq('tag', tag)
 

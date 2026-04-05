@@ -5,6 +5,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import DOMPurify from 'dompurify'
 import { Loader2 } from 'lucide-react'
 
 import { noteQueryOptions } from '@/modules/notes/queries/note.queries'
@@ -40,7 +41,7 @@ export function NoteEditor() {
     immediatelyRender: false,
     extensions: [StarterKit, Placeholder.configure({ placeholder: 'Comece a escrever...' })],
     content: '',
-    onUpdate: ({ editor: ed }) => saveContent(ed.getHTML()),
+    onUpdate: ({ editor: ed }) => saveContent(DOMPurify.sanitize(ed.getHTML())),
     editorProps: {
       attributes: {
         class: 'note-editor__content',

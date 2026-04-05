@@ -1,8 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
 
 import { getAuthenticatedUser } from '@/lib/supabase/get-user'
+
+const uuidParam = z.string().uuid()
 import {
   createFolderSchema,
   createNoteSchema,
@@ -36,6 +39,7 @@ export async function createNote(input: CreateNoteInput) {
 }
 
 export async function updateNote(id: string, input: UpdateNoteInput) {
+  if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
   const { supabase, user } = await getAuthenticatedUser()
   const parsed = updateNoteSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten() }
@@ -54,6 +58,7 @@ export async function updateNote(id: string, input: UpdateNoteInput) {
 }
 
 export async function deleteNote(id: string) {
+  if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
   const { supabase, user } = await getAuthenticatedUser()
 
   const { error } = await supabase.from('notes').delete().eq('id', id).eq('user_id', user.id)
@@ -88,6 +93,7 @@ export async function getNotes(folderId?: string | null) {
 }
 
 export async function getNoteById(id: string) {
+  if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
   const { supabase, user } = await getAuthenticatedUser()
 
   const { data, error } = await supabase
@@ -134,6 +140,7 @@ export async function getFolders() {
 }
 
 export async function deleteFolder(id: string) {
+  if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
   const { supabase, user } = await getAuthenticatedUser()
 
   const { error } = await supabase.from('note_folders').delete().eq('id', id).eq('user_id', user.id)

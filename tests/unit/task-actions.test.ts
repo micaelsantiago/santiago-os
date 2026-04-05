@@ -283,6 +283,9 @@ describe('deleteTask', () => {
 
 describe('moveTask', () => {
   it('move task com sucesso', async () => {
+    // 1st await: ownership check da coluna destino
+    mockResult({ data: { id: uuid } })
+    // 2nd await: update da task
     mockResult({ error: null })
 
     const result = await moveTask({ taskId: uuid, columnId: uuid, position: 2 })
@@ -294,7 +297,15 @@ describe('moveTask', () => {
     expect(result.error).toBeDefined()
   })
 
+  it('retorna erro se coluna não pertence ao user', async () => {
+    mockResult({ data: null })
+
+    const result = await moveTask({ taskId: uuid, columnId: uuid, position: 0 })
+    expect(result).toEqual({ error: 'Coluna não encontrada' })
+  })
+
   it('retorna erro se update falhar', async () => {
+    mockResult({ data: { id: uuid } })
     mockResult({ error: { message: 'fail' } })
 
     const result = await moveTask({ taskId: uuid, columnId: uuid, position: 0 })
@@ -308,13 +319,24 @@ describe('moveTask', () => {
 
 describe('addTaskTag', () => {
   it('adiciona tag com sucesso', async () => {
+    // 1st await: ownership check da task
+    mockResult({ data: { id: uuid } })
+    // 2nd await: insert da tag
     mockResult({ error: null })
 
     const result = await addTaskTag(uuid, 'urgent')
     expect(result).toEqual({ success: true })
   })
 
+  it('retorna erro se task não pertence ao user', async () => {
+    mockResult({ data: null })
+
+    const result = await addTaskTag(uuid, 'urgent')
+    expect(result).toEqual({ error: 'Tarefa não encontrada' })
+  })
+
   it('retorna erro se insert falhar', async () => {
+    mockResult({ data: { id: uuid } })
     mockResult({ error: { message: 'fail' } })
 
     const result = await addTaskTag(uuid, 'urgent')
@@ -324,13 +346,24 @@ describe('addTaskTag', () => {
 
 describe('removeTaskTag', () => {
   it('remove tag com sucesso', async () => {
+    // 1st await: ownership check da task
+    mockResult({ data: { id: uuid } })
+    // 2nd await: delete da tag
     mockResult({ error: null })
 
     const result = await removeTaskTag(uuid, 'urgent')
     expect(result).toEqual({ success: true })
   })
 
+  it('retorna erro se task não pertence ao user', async () => {
+    mockResult({ data: null })
+
+    const result = await removeTaskTag(uuid, 'urgent')
+    expect(result).toEqual({ error: 'Tarefa não encontrada' })
+  })
+
   it('retorna erro se delete falhar', async () => {
+    mockResult({ data: { id: uuid } })
     mockResult({ error: { message: 'fail' } })
 
     const result = await removeTaskTag(uuid, 'urgent')
