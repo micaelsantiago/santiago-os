@@ -208,6 +208,22 @@ RESEND_FROM_EMAIL=
 
 ---
 
+## Documentação
+
+| Doc | Descrição |
+|-----|-----------|
+| [Getting Started](docs/getting-started.md) | Setup passo-a-passo |
+| [Arquitetura](docs/architecture.md) | Fluxo de dados, decisões, estrutura |
+| [Database](docs/database.md) | Schema, RLS, migrations |
+| [Auth & RBAC](docs/auth.md) | Login, roles, controle de acesso |
+| [Segurança](docs/security.md) | Modelo de segurança, checklist |
+| [Tarefas](docs/modules/tasks.md) | Módulo Kanban |
+| [Notas](docs/modules/notes.md) | Módulo de notas |
+| [Settings](docs/modules/settings.md) | Gestão de members |
+| [Contributing](docs/contributing.md) | Convenções, como criar módulos |
+
+---
+
 ## Roadmap
 
 | Fase | Módulos | Status |
