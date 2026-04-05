@@ -55,6 +55,8 @@
   --nav-icon-size: 36px;
   --palette-width: 480px;
   --palette-offset-top: 80px;
+  --kanban-column-width: 280px;
+  --kanban-column-gap: var(--space-5);
 }
 
 .dark,

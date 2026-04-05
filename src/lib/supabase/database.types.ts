@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      boards: {
+        Row: {
+          created_at: string | null
+          id: string
+          project_id: string | null
+          title: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          title: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          title?: string
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      columns: {
+        Row: {
+          board_id: string
+          color: string | null
+          id: string
+          position: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          board_id: string
+          color?: string | null
+          id?: string
+          position: number
+          title: string
+          user_id: string
+        }
+        Update: {
+          board_id?: string
+          color?: string | null
+          id?: string
+          position?: number
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "columns_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       note_folders: {
         Row: {
           id: string
@@ -136,6 +198,79 @@ export type Database = {
           timezone?: string | null
         }
         Relationships: []
+      }
+      task_tags: {
+        Row: {
+          tag: string
+          task_id: string
+        }
+        Insert: {
+          tag: string
+          task_id: string
+        }
+        Update: {
+          tag?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_tags_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          column_id: string
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          position: number
+          priority: string | null
+          status: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          column_id: string
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          position: number
+          priority?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          column_id?: string
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          position?: number
+          priority?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_column_id_fkey"
+            columns: ["column_id"]
+            isOneToOne: false
+            referencedRelation: "columns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
