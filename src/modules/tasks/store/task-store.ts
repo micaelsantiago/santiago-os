@@ -19,20 +19,18 @@ interface TaskStoreActions {
   resetFilters: () => void
 }
 
-export const useTaskStore = create<TaskStoreState & TaskStoreActions>(
-  (set) => ({
-    selectedBoardId: null,
-    selectedTaskId: null,
-    isCreatingTask: false,
-    editingTaskId: null,
-    searchQuery: '',
-    filterPriority: null,
-    setSelectedBoardId: (id) => set({ selectedBoardId: id }),
-    selectTask: (id) => set({ selectedTaskId: id }),
-    setCreatingTask: (creating) => set({ isCreatingTask: creating }),
-    setEditingTaskId: (id) => set({ editingTaskId: id }),
-    setSearchQuery: (query) => set({ searchQuery: query }),
-    setFilterPriority: (priority) => set({ filterPriority: priority }),
-    resetFilters: () => set({ searchQuery: '', filterPriority: null }),
-  })
-)
+export const useTaskStore = create<TaskStoreState & TaskStoreActions>((set) => ({
+  selectedBoardId: null,
+  selectedTaskId: null,
+  isCreatingTask: false,
+  editingTaskId: null,
+  searchQuery: '',
+  filterPriority: null,
+  setSelectedBoardId: (id) => set({ selectedBoardId: id }),
+  selectTask: (id) => set({ selectedTaskId: id }),
+  setCreatingTask: (creating) => set({ isCreatingTask: creating }),
+  setEditingTaskId: (id) => set({ editingTaskId: id }),
+  setSearchQuery: (query) => set({ searchQuery: query }),
+  setFilterPriority: (priority) => set({ filterPriority: priority }),
+  resetFilters: () => set({ searchQuery: '', filterPriority: null }),
+}))

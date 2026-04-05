@@ -21,17 +21,11 @@ export function AppShell({ children }: AppLayoutProps) {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar onOpenCommandPalette={handleOpenCommandPalette} />
-        <main
-          className="flex-1 overflow-auto p-4"
-          style={{ backgroundColor: 'var(--color-bg-3)' }}
-        >
+        <main className="flex-1 overflow-auto p-4" style={{ backgroundColor: 'var(--color-bg-3)' }}>
           {children}
         </main>
       </div>
-      <CommandPalette
-        open={commandPaletteOpen}
-        onOpenChange={setCommandPaletteOpen}
-      />
+      <CommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
     </div>
   )
 }

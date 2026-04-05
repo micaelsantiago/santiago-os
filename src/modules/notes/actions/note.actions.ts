@@ -56,11 +56,7 @@ export async function updateNote(id: string, input: UpdateNoteInput) {
 export async function deleteNote(id: string) {
   const { supabase, user } = await getAuthenticatedUser()
 
-  const { error } = await supabase
-    .from('notes')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', user.id)
+  const { error } = await supabase.from('notes').delete().eq('id', id).eq('user_id', user.id)
 
   if (error) return { error: 'Erro ao deletar nota' }
   revalidatePath('/notes')
@@ -140,11 +136,7 @@ export async function getFolders() {
 export async function deleteFolder(id: string) {
   const { supabase, user } = await getAuthenticatedUser()
 
-  const { error } = await supabase
-    .from('note_folders')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', user.id)
+  const { error } = await supabase.from('note_folders').delete().eq('id', id).eq('user_id', user.id)
 
   if (error) return { error: 'Erro ao deletar pasta' }
   revalidatePath('/notes')

@@ -14,22 +14,22 @@ Inspirações: Notion, Obsidian, Linear, Todoist. Diferencial: integração com 
 
 ## Stack Técnico
 
-| Camada             | Decisão                               |
-|--------------------|---------------------------------------|
-| Frontend           | Next.js 16.2 (App Router)             |
-| Linguagem          | TypeScript strict                     |
-| Backend / DB       | Supabase (PostgreSQL + Auth + Storage)|
-| CSS                | Tailwind CSS v4                       |
-| UI components      | shadcn/ui                             |
-| Estado global      | Zustand                               |
-| Estado servidor    | TanStack Query                        |
-| Formulários        | React Hook Form + Zod                 |
-| Editor Markdown    | Tiptap                                |
-| Testes             | Vitest (unit/integration) + Playwright (E2E) |
-| LLM / Agente       | Anthropic Claude API (sonnet + haiku) |
-| Notificações       | Resend (email) + Telegram Bot API     |
-| Linting            | ESLint flat config + Prettier         |
-| Commits            | Conventional Commits                  |
+| Camada          | Decisão                                      |
+| --------------- | -------------------------------------------- |
+| Frontend        | Next.js 16.2 (App Router)                    |
+| Linguagem       | TypeScript strict                            |
+| Backend / DB    | Supabase (PostgreSQL + Auth + Storage)       |
+| CSS             | Tailwind CSS v4                              |
+| UI components   | shadcn/ui                                    |
+| Estado global   | Zustand                                      |
+| Estado servidor | TanStack Query                               |
+| Formulários     | React Hook Form + Zod                        |
+| Editor Markdown | Tiptap                                       |
+| Testes          | Vitest (unit/integration) + Playwright (E2E) |
+| LLM / Agente    | Anthropic Claude API (sonnet + haiku)        |
+| Notificações    | Resend (email) + Telegram Bot API            |
+| Linting         | ESLint flat config + Prettier                |
+| Commits         | Conventional Commits                         |
 
 ### Next.js 16 — mudanças críticas vs 15
 
@@ -42,16 +42,16 @@ Inspirações: Notion, Obsidian, Linear, Todoist. Diferencial: integração com 
 
 ## Módulos do Sistema
 
-| Módulo       | Rota        | Descrição                                                  |
-|--------------|-------------|------------------------------------------------------------|
-| Tarefas      | `/tasks`    | Kanban com colunas configuráveis, drag-and-drop, filtros   |
-| Calendário   | `/calendar` | Agenda com sync bidirecional Google Calendar               |
-| Projetos     | `/projects` | Kanban por projeto + roadmap, reutiliza módulo de Tarefas  |
-| Notas        | `/notes`    | Editor Markdown, pastas, links internos `[[nota]]`, tags   |
-| Email        | `/email`    | Cliente IMAP/SMTP, inbox unificada, criar tarefa de email  |
-| Notificações | —           | Email + Telegram, lembretes, resumo diário                 |
-| Agente       | `/agent`    | Assistente IA com acesso a todos os módulos via tool use   |
-| Integrações  | —           | n8n, Google Calendar, Google Drive, Telegram               |
+| Módulo       | Rota        | Descrição                                                 |
+| ------------ | ----------- | --------------------------------------------------------- |
+| Tarefas      | `/tasks`    | Kanban com colunas configuráveis, drag-and-drop, filtros  |
+| Calendário   | `/calendar` | Agenda com sync bidirecional Google Calendar              |
+| Projetos     | `/projects` | Kanban por projeto + roadmap, reutiliza módulo de Tarefas |
+| Notas        | `/notes`    | Editor Markdown, pastas, links internos `[[nota]]`, tags  |
+| Email        | `/email`    | Cliente IMAP/SMTP, inbox unificada, criar tarefa de email |
+| Notificações | —           | Email + Telegram, lembretes, resumo diário                |
+| Agente       | `/agent`    | Assistente IA com acesso a todos os módulos via tool use  |
+| Integrações  | —           | n8n, Google Calendar, Google Drive, Telegram              |
 
 ---
 
@@ -104,7 +104,7 @@ tests/{unit,integration,e2e}/
 ### Nomenclatura
 
 | O quê                  | Padrão            | Exemplo                     |
-|------------------------|-------------------|-----------------------------|
+| ---------------------- | ----------------- | --------------------------- |
 | Arquivos de componente | `PascalCase`      | `TaskCard.tsx`              |
 | Hooks                  | `camelCase`       | `useTaskBoard.ts`           |
 | Utilitários / stores   | `kebab-case`      | `task-store.ts`             |
@@ -123,11 +123,17 @@ tests/{unit,integration,e2e}/
 // ✅ Server Component (padrão)
 export async function TaskBoard() {
   const tasks = await getTasks()
-  return <div>{tasks.map(t => <TaskCard key={t.id} task={t} />)}</div>
+  return (
+    <div>
+      {tasks.map((t) => (
+        <TaskCard key={t.id} task={t} />
+      ))}
+    </div>
+  )
 }
 
 // ✅ Client Component — apenas com interatividade
-"use client"
+;('use client')
 export function TaskCard({ task }: { task: Task }) {
   const [open, setOpen] = useState(false)
 }
@@ -138,7 +144,7 @@ export function TaskCard({ task }: { task: Task }) {
 Toda mutação passa por Server Actions. Nunca Supabase direto no cliente.
 
 ```ts
-"use server"
+'use server'
 export async function createTask(input: CreateTaskInput) {
   const { supabase, user } = await getAuthenticatedUser() // sempre primeiro
   const parsed = createTaskSchema.safeParse(input)
@@ -158,12 +164,12 @@ Schema Zod é a fonte da verdade. Tipos sempre inferidos, nunca escritos à mão
 
 ```ts
 export const taskSchema = z.object({
-  title:     z.string().min(1).max(255),
-  priority:  z.enum(['low', 'medium', 'high']),
+  title: z.string().min(1).max(255),
+  priority: z.enum(['low', 'medium', 'high']),
   column_id: z.string().uuid(),
-  due_date:  z.string().datetime().optional(),
+  due_date: z.string().datetime().optional(),
 })
-export type Task            = z.infer<typeof taskSchema>
+export type Task = z.infer<typeof taskSchema>
 export type CreateTaskInput = z.infer<typeof taskSchema>
 ```
 
@@ -178,7 +184,7 @@ Sempre aliases. Nunca `../../..`.
 
 ```ts
 import { TaskCard } from '@/modules/tasks/components/TaskCard'
-import { Button }   from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 ```
 
 ### Commits
@@ -206,35 +212,55 @@ Estilo: **minimalista e limpo** (Linear, Vercel). Bordas `0.5px`, sem gradientes
 
 ```css
 :root {
-  --color-bg:          #ffffff;
-  --color-bg-2:        #f7f7f5;
-  --color-bg-3:        #f0efec;
-  --color-text:        #0a0a0a;
-  --color-text-2:      #6b6b6b;
-  --color-text-3:      #a0a0a0;
-  --color-border:      #e5e5e3;
-  --color-border-2:    #d0d0ce;
-  --color-accent:      #5746af;
-  --color-accent-bg:   #eeedf8;
+  --color-bg: #ffffff;
+  --color-bg-2: #f7f7f5;
+  --color-bg-3: #f0efec;
+  --color-text: #0a0a0a;
+  --color-text-2: #6b6b6b;
+  --color-text-3: #a0a0a0;
+  --color-border: #e5e5e3;
+  --color-border-2: #d0d0ce;
+  --color-accent: #5746af;
+  --color-accent-bg: #eeedf8;
   --color-accent-text: #3d318f;
-  --color-success:     #3b6d11; --color-success-bg: #eaf3de;
-  --color-warning:     #854f0b; --color-warning-bg: #faeeda;
-  --color-danger:      #a32d2d; --color-danger-bg:  #fcebeb;
-  --color-info:        #185fa5; --color-info-bg:    #e6f1fb;
-  --font:       'Inter', 'Geist', system-ui, sans-serif;
-  --font-mono:  'GeistMono', 'JetBrains Mono', monospace;
-  --radius-sm: 4px; --radius: 6px; --radius-lg: 10px; --radius-xl: 14px;
-  --sidebar-width: 48px; --topbar-height: 44px;
+  --color-success: #3b6d11;
+  --color-success-bg: #eaf3de;
+  --color-warning: #854f0b;
+  --color-warning-bg: #faeeda;
+  --color-danger: #a32d2d;
+  --color-danger-bg: #fcebeb;
+  --color-info: #185fa5;
+  --color-info-bg: #e6f1fb;
+  --font: 'Inter', 'Geist', system-ui, sans-serif;
+  --font-mono: 'GeistMono', 'JetBrains Mono', monospace;
+  --radius-sm: 4px;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --sidebar-width: 48px;
+  --topbar-height: 44px;
 }
-.dark, [data-theme="dark"] {
-  --color-bg: #111110; --color-bg-2: #1a1a18; --color-bg-3: #222220;
-  --color-text: #f0efec; --color-text-2: #888785; --color-text-3: #555553;
-  --color-border: #2a2a28; --color-border-2: #3a3a38;
-  --color-accent: #7c6de0; --color-accent-bg: #1e1a3a; --color-accent-text: #a99ef0;
-  --color-success: #97c459; --color-success-bg: #172a0a;
-  --color-warning: #ef9f27; --color-warning-bg: #2a1e08;
-  --color-danger:  #f09595; --color-danger-bg:  #2a1010;
-  --color-info:    #85b7eb; --color-info-bg:    #0c1e2e;
+.dark,
+[data-theme='dark'] {
+  --color-bg: #111110;
+  --color-bg-2: #1a1a18;
+  --color-bg-3: #222220;
+  --color-text: #f0efec;
+  --color-text-2: #888785;
+  --color-text-3: #555553;
+  --color-border: #2a2a28;
+  --color-border-2: #3a3a38;
+  --color-accent: #7c6de0;
+  --color-accent-bg: #1e1a3a;
+  --color-accent-text: #a99ef0;
+  --color-success: #97c459;
+  --color-success-bg: #172a0a;
+  --color-warning: #ef9f27;
+  --color-warning-bg: #2a1e08;
+  --color-danger: #f09595;
+  --color-danger-bg: #2a1010;
+  --color-info: #85b7eb;
+  --color-info-bg: #0c1e2e;
 }
 ```
 
@@ -242,13 +268,13 @@ Estilo: **minimalista e limpo** (Linear, Vercel). Bordas `0.5px`, sem gradientes
 
 Pesos: apenas `400` e `500`. Nunca `600`, `700` ou `bold`.
 
-| Tamanho | Peso | Uso                     |
-|---------|------|-------------------------|
-| 11px    | 400  | Labels uppercase, atalhos|
-| 12px    | 400  | Metadata, datas          |
-| 13px    | 400  | Corpo padrão             |
-| 14px    | 500  | Títulos de card          |
-| 16px    | 500  | Títulos de página        |
+| Tamanho | Peso | Uso                       |
+| ------- | ---- | ------------------------- |
+| 11px    | 400  | Labels uppercase, atalhos |
+| 12px    | 400  | Metadata, datas           |
+| 13px    | 400  | Corpo padrão              |
+| 14px    | 500  | Títulos de card           |
+| 16px    | 500  | Títulos de página         |
 
 ### Layout shell
 
@@ -272,12 +298,12 @@ Sidebar é fixa em 48px (somente ícones, sem estado expandido). Navegação por
 
 ```ts
 interface PaletteItem {
-  id:       string
-  label:    string
-  icon:     LucideIcon
+  id: string
+  label: string
+  icon: LucideIcon
   shortcut?: string
-  action:   () => void
-  section:  'navigate' | 'create' | 'recent' | 'settings'
+  action: () => void
+  section: 'navigate' | 'create' | 'recent' | 'settings'
 }
 ```
 
@@ -287,12 +313,12 @@ Lucide React — `size={16}` `strokeWidth={1.5}`.
 
 ### Badges de prioridade / status
 
-| Estado       | Background / Texto                             |
-|--------------|------------------------------------------------|
-| Alta         | `--color-danger-bg` / `--color-danger`         |
-| Média        | `--color-warning-bg` / `--color-warning`       |
-| Baixa        | `--color-success-bg` / `--color-success`       |
-| Em progresso | `--color-accent-bg` / `--color-accent-text`    |
+| Estado       | Background / Texto                          |
+| ------------ | ------------------------------------------- |
+| Alta         | `--color-danger-bg` / `--color-danger`      |
+| Média        | `--color-warning-bg` / `--color-warning`    |
+| Baixa        | `--color-success-bg` / `--color-success`    |
+| Em progresso | `--color-accent-bg` / `--color-accent-text` |
 
 ### Regras absolutas de UI
 
@@ -562,15 +588,21 @@ export async function proxy(request: NextRequest) {
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
-    { cookies: {
+    {
+      cookies: {
         getAll: () => request.cookies.getAll(),
-        setAll: (c) => c.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
-    }}
+        setAll: (c) =>
+          c.forEach(({ name, value, options }) => response.cookies.set(name, value, options)),
+      },
+    },
   )
-  const { data: { user } } = await supabase.auth.getUser()
-  const pub = ['/login', '/auth/callback'].some(p => request.nextUrl.pathname.startsWith(p))
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const pub = ['/login', '/auth/callback'].some((p) => request.nextUrl.pathname.startsWith(p))
   if (!user && !pub) return NextResponse.redirect(new URL('/login', request.url))
-  if (user && request.nextUrl.pathname === '/login') return NextResponse.redirect(new URL('/tasks', request.url))
+  if (user && request.nextUrl.pathname === '/login')
+    return NextResponse.redirect(new URL('/tasks', request.url))
   return response
 }
 
@@ -585,7 +617,10 @@ export const config = { matcher: ['/((?!api|_next/static|_next/image|favicon.ico
 // src/lib/supabase/get-user.ts
 export async function getAuthenticatedUser() {
   const supabase = await createServerClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
   if (error || !user) redirect('/login')
   return { supabase, user }
 }
@@ -607,8 +642,11 @@ export async function checkAgentRateLimit(userId: string): Promise<boolean> {
   const supabase = await createServerClient()
   const windowStart = new Date(Date.now() - 60_000).toISOString()
   const { count } = await supabase
-    .from('agent_messages').select('*', { count: 'exact', head: true })
-    .eq('user_id', userId).eq('role', 'user').gte('created_at', windowStart)
+    .from('agent_messages')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('role', 'user')
+    .gte('created_at', windowStart)
   return (count ?? 0) < 20
 }
 ```
@@ -688,10 +726,14 @@ it('cria tarefa', async () => {
 ```ts
 describe('createTaskSchema', () => {
   it('valida input correto', () => {
-    expect(createTaskSchema.safeParse({ title: 'ok', priority: 'high', column_id: 'uuid' }).success).toBe(true)
+    expect(
+      createTaskSchema.safeParse({ title: 'ok', priority: 'high', column_id: 'uuid' }).success,
+    ).toBe(true)
   })
   it('rejeita título vazio', () => {
-    expect(createTaskSchema.safeParse({ title: '', priority: 'high', column_id: 'uuid' }).success).toBe(false)
+    expect(
+      createTaskSchema.safeParse({ title: '', priority: 'high', column_id: 'uuid' }).success,
+    ).toBe(false)
   })
 })
 ```
@@ -758,17 +800,17 @@ RESEND_FROM_EMAIL=
 
 ## Roadmap
 
-| Fase | Módulos                         |
-|------|---------------------------------|
-| 1    | Auth + Layout + Notas           |
-| 2    | Tarefas (Kanban)                |
-| 3    | Calendário + sync Google        |
-| 4    | Projetos                        |
-| 5    | Email                           |
-| 6    | Notificações + Telegram         |
-| 7    | Agente Secretário               |
-| 8    | n8n + integrações avançadas     |
+| Fase | Módulos                     |
+| ---- | --------------------------- |
+| 1    | Auth + Layout + Notas       |
+| 2    | Tarefas (Kanban)            |
+| 3    | Calendário + sync Google    |
+| 4    | Projetos                    |
+| 5    | Email                       |
+| 6    | Notificações + Telegram     |
+| 7    | Agente Secretário           |
+| 8    | n8n + integrações avançadas |
 
 ---
 
-*Última atualização: 2026-04-03*
+_Última atualização: 2026-04-03_

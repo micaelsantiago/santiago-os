@@ -14,9 +14,7 @@ import { useNoteStore } from '@/modules/notes/store/note-store'
 export function NoteEditor() {
   const { selectedNoteId } = useNoteStore()
   const queryClient = useQueryClient()
-  const { data: result, isLoading } = useQuery(
-    noteQueryOptions(selectedNoteId ?? ''),
-  )
+  const { data: result, isLoading } = useQuery(noteQueryOptions(selectedNoteId ?? ''))
   const note = result?.success ? result.data : null
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -40,10 +38,7 @@ export function NoteEditor() {
 
   const editor = useEditor({
     immediatelyRender: false,
-    extensions: [
-      StarterKit,
-      Placeholder.configure({ placeholder: 'Comece a escrever...' }),
-    ],
+    extensions: [StarterKit, Placeholder.configure({ placeholder: 'Comece a escrever...' })],
     content: '',
     onUpdate: ({ editor: ed }) => saveContent(ed.getHTML()),
     editorProps: {
@@ -89,11 +84,7 @@ export function NoteEditor() {
   }, [])
 
   if (!selectedNoteId) {
-    return (
-      <div className="note-editor note-editor--empty">
-        Selecione uma nota ou crie uma nova
-      </div>
-    )
+    return <div className="note-editor note-editor--empty">Selecione uma nota ou crie uma nova</div>
   }
 
   if (isLoading) {
@@ -106,11 +97,7 @@ export function NoteEditor() {
   }
 
   if (!note) {
-    return (
-      <div className="note-editor note-editor--empty">
-        Nota não encontrada
-      </div>
-    )
+    return <div className="note-editor note-editor--empty">Nota não encontrada</div>
   }
 
   return (

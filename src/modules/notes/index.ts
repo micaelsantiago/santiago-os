@@ -24,11 +24,7 @@ export {
   deleteFolder,
 } from './actions/note.actions'
 
-export {
-  notesQueryOptions,
-  noteQueryOptions,
-  foldersQueryOptions,
-} from './queries/note.queries'
+export { notesQueryOptions, noteQueryOptions, foldersQueryOptions } from './queries/note.queries'
 
 export { useNoteStore } from './store/note-store'
 

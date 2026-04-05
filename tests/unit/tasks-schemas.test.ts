@@ -234,7 +234,9 @@ describe('createTaskSchema', () => {
   })
 
   it('rejeita prioridade inválida', () => {
-    expect(createTaskSchema.safeParse({ column_id: uuid, title: 'T', priority: 'urgent' }).success).toBe(false)
+    expect(
+      createTaskSchema.safeParse({ column_id: uuid, title: 'T', priority: 'urgent' }).success,
+    ).toBe(false)
   })
 })
 
@@ -256,11 +258,15 @@ describe('updateTaskSchema', () => {
 
 describe('moveTaskSchema', () => {
   it('valida input completo', () => {
-    expect(moveTaskSchema.safeParse({ taskId: uuid, columnId: uuid, position: 0 }).success).toBe(true)
+    expect(moveTaskSchema.safeParse({ taskId: uuid, columnId: uuid, position: 0 }).success).toBe(
+      true,
+    )
   })
 
   it('rejeita position decimal', () => {
-    expect(moveTaskSchema.safeParse({ taskId: uuid, columnId: uuid, position: 1.5 }).success).toBe(false)
+    expect(moveTaskSchema.safeParse({ taskId: uuid, columnId: uuid, position: 1.5 }).success).toBe(
+      false,
+    )
   })
 
   it('rejeita sem campos', () => {

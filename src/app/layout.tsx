@@ -17,11 +17,7 @@ export const metadata: Metadata = {
   description: 'Sistema pessoal de organização e produtividade',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="pt-BR"

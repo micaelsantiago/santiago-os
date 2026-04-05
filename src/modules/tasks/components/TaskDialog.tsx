@@ -15,11 +15,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  createTask,
-  updateTask,
-  deleteTask,
-} from '@/modules/tasks/actions/task.actions'
+import { createTask, updateTask, deleteTask } from '@/modules/tasks/actions/task.actions'
 import { columnsQueryOptions } from '@/modules/tasks/queries/task.queries'
 import { useTaskStore } from '@/modules/tasks/store/task-store'
 import type { Task } from '@/modules/tasks/types/task.types'
@@ -46,13 +42,9 @@ export function TaskDialog({ tasks }: TaskDialogProps) {
 
   const columnsQuery = useQuery(columnsQueryOptions(boardId ?? ''))
   const columns =
-    columnsQuery.data && 'success' in columnsQuery.data
-      ? (columnsQuery.data.data ?? [])
-      : []
+    columnsQuery.data && 'success' in columnsQuery.data ? (columnsQuery.data.data ?? []) : []
 
-  const editingTask = editingTaskId
-    ? tasks.find((t) => t.id === editingTaskId)
-    : null
+  const editingTask = editingTaskId ? tasks.find((t) => t.id === editingTaskId) : null
 
   const isOpen = isCreatingTask || !!editingTaskId
   const isEditMode = !!editingTask
@@ -74,9 +66,7 @@ export function TaskDialog({ tasks }: TaskDialogProps) {
         title: editingTask.title,
         description: editingTask.description ?? '',
         priority: editingTask.priority,
-        due_date: editingTask.due_date
-          ? editingTask.due_date.slice(0, 16)
-          : '',
+        due_date: editingTask.due_date ? editingTask.due_date.slice(0, 16) : '',
         column_id: editingTask.column_id,
       })
     } else if (isCreatingTask) {
@@ -127,9 +117,7 @@ export function TaskDialog({ tasks }: TaskDialogProps) {
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            {isEditMode ? 'Editar tarefa' : 'Nova tarefa'}
-          </DialogTitle>
+          <DialogTitle>{isEditMode ? 'Editar tarefa' : 'Nova tarefa'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
@@ -154,11 +142,7 @@ export function TaskDialog({ tasks }: TaskDialogProps) {
           <div className="flex gap-4">
             <div className="flex flex-1 flex-col gap-1.5">
               <Label htmlFor="priority">Prioridade</Label>
-              <select
-                id="priority"
-                className="task-dialog__select"
-                {...register('priority')}
-              >
+              <select id="priority" className="task-dialog__select" {...register('priority')}>
                 <option value="low">Baixa</option>
                 <option value="medium">Média</option>
                 <option value="high">Alta</option>
@@ -167,11 +151,7 @@ export function TaskDialog({ tasks }: TaskDialogProps) {
 
             <div className="flex flex-1 flex-col gap-1.5">
               <Label htmlFor="column_id">Coluna</Label>
-              <select
-                id="column_id"
-                className="task-dialog__select"
-                {...register('column_id')}
-              >
+              <select id="column_id" className="task-dialog__select" {...register('column_id')}>
                 {columns.map((col) => (
                   <option key={col.id} value={col.id}>
                     {col.title}
@@ -183,11 +163,7 @@ export function TaskDialog({ tasks }: TaskDialogProps) {
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="due_date">Data limite</Label>
-            <Input
-              id="due_date"
-              type="datetime-local"
-              {...register('due_date')}
-            />
+            <Input id="due_date" type="datetime-local" {...register('due_date')} />
           </div>
 
           <DialogFooter>

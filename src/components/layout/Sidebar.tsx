@@ -2,21 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  CheckSquare,
-  Calendar,
-  FolderKanban,
-  FileText,
-  Mail,
-  Bot,
-} from 'lucide-react'
+import { CheckSquare, Calendar, FolderKanban, FileText, Mail, Bot } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface NavItem {
   href: string

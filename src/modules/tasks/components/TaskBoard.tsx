@@ -35,7 +35,7 @@ export function TaskBoard() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor)
+    useSensor(KeyboardSensor),
   )
 
   // Queries
@@ -54,14 +54,10 @@ export function TaskBoard() {
   }, [boardId, setSelectedBoardId])
 
   const columns =
-    columnsQuery.data && 'success' in columnsQuery.data
-      ? (columnsQuery.data.data ?? [])
-      : []
+    columnsQuery.data && 'success' in columnsQuery.data ? (columnsQuery.data.data ?? []) : []
 
   const allTasks =
-    tasksQuery.data && 'success' in tasksQuery.data
-      ? (tasksQuery.data.data ?? [])
-      : []
+    tasksQuery.data && 'success' in tasksQuery.data ? (tasksQuery.data.data ?? []) : []
 
   // Client-side filtering
   const filteredTasks = useMemo(() => {
@@ -99,15 +95,12 @@ export function TaskBoard() {
       const task = allTasks.find((t) => t.id === event.active.id)
       if (task) setActiveTask(task)
     },
-    [allTasks]
+    [allTasks],
   )
 
-  const handleDragOver = useCallback(
-    (_event: DragOverEvent) => {
-      // Visual feedback handled by KanbanColumn's isOver state
-    },
-    []
-  )
+  const handleDragOver = useCallback((_event: DragOverEvent) => {
+    // Visual feedback handled by KanbanColumn's isOver state
+  }, [])
 
   const handleDragEnd = useCallback(
     async (event: DragEndEvent) => {
@@ -134,9 +127,7 @@ export function TaskBoard() {
       }
 
       // Calculate new position
-      const tasksInTargetCol = (tasksByColumn[targetColumnId] ?? []).filter(
-        (t) => t.id !== taskId
-      )
+      const tasksInTargetCol = (tasksByColumn[targetColumnId] ?? []).filter((t) => t.id !== taskId)
 
       let newPosition: number
       if (overData?.type === 'column') {
@@ -156,7 +147,7 @@ export function TaskBoard() {
       await moveTask({ taskId, columnId: targetColumnId, position: newPosition })
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
     },
-    [allTasks, tasksByColumn, queryClient]
+    [allTasks, tasksByColumn, queryClient],
   )
 
   // Loading state
@@ -188,16 +179,10 @@ export function TaskBoard() {
     >
       <div className="tasks-board">
         {columns.map((column) => (
-          <KanbanColumn
-            key={column.id}
-            column={column}
-            tasks={tasksByColumn[column.id] ?? []}
-          />
+          <KanbanColumn key={column.id} column={column} tasks={tasksByColumn[column.id] ?? []} />
         ))}
       </div>
-      <DragOverlay>
-        {activeTask ? <TaskCard task={activeTask} /> : null}
-      </DragOverlay>
+      <DragOverlay>{activeTask ? <TaskCard task={activeTask} /> : null}</DragOverlay>
     </DndContext>
   )
 }

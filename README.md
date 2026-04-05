@@ -13,14 +13,14 @@ Sistema pessoal de organização e produtividade. Centraliza tarefas, projetos, 
 
 ## Módulos
 
-| Módulo       | Rota        | Descrição                                    |
-|--------------|-------------|----------------------------------------------|
-| Tarefas      | `/tasks`    | Kanban com colunas configuráveis             |
-| Calendário   | `/calendar` | Agenda com sync Google Calendar              |
-| Projetos     | `/projects` | Kanban por projeto + roadmap                 |
-| Notas        | `/notes`    | Editor Markdown, pastas, tags                |
-| Email        | `/email`    | Inbox unificada IMAP/SMTP                    |
-| Agente       | `/agent`    | Assistente IA com acesso a todos os módulos  |
+| Módulo     | Rota        | Descrição                                   |
+| ---------- | ----------- | ------------------------------------------- |
+| Tarefas    | `/tasks`    | Kanban com colunas configuráveis            |
+| Calendário | `/calendar` | Agenda com sync Google Calendar             |
+| Projetos   | `/projects` | Kanban por projeto + roadmap                |
+| Notas      | `/notes`    | Editor Markdown, pastas, tags               |
+| Email      | `/email`    | Inbox unificada IMAP/SMTP                   |
+| Agente     | `/agent`    | Assistente IA com acesso a todos os módulos |
 
 ## Setup
 

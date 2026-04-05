@@ -35,7 +35,6 @@ export function LoginForm() {
     router.push('/tasks')
   }
 
-
   return (
     <div
       style={{

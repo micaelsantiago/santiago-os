@@ -36,12 +36,7 @@ export function Topbar({ onOpenCommandPalette }: TopbarProps) {
   return (
     <header className="topbar">
       <span className="topbar__title">{label}</span>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onOpenCommandPalette}
-        className="topbar__shortcut"
-      >
+      <Button variant="ghost" size="sm" onClick={onOpenCommandPalette} className="topbar__shortcut">
         <kbd className="topbar__kbd">{isMac() ? '\u2318' : 'Ctrl'}</kbd>
         <kbd className="topbar__kbd">K</kbd>
       </Button>

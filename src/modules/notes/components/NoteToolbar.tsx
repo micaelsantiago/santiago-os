@@ -6,11 +6,7 @@ import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { noteQueryOptions } from '@/modules/notes/queries/note.queries'
-import {
-  createNote,
-  deleteNote,
-  updateNote,
-} from '@/modules/notes/actions/note.actions'
+import { createNote, deleteNote, updateNote } from '@/modules/notes/actions/note.actions'
 import { useNoteStore } from '@/modules/notes/store/note-store'
 
 export function NoteToolbar() {

@@ -24,7 +24,9 @@
   border-radius: var(--radius);
   color: var(--color-text-3);
   background-color: transparent;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 .sidebar__link:hover {
@@ -215,7 +217,9 @@
   border-radius: var(--radius);
   text-align: left;
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 .note-sidebar__item:hover {
@@ -455,10 +459,21 @@
   color: var(--color-text);
 }
 
-.note-editor__tiptap .tiptap h1 { font-size: var(--text-lg); margin: 1em 0 0.5em; }
-.note-editor__tiptap .tiptap h2 { font-size: var(--text-md); margin: 1em 0 0.5em; }
-.note-editor__tiptap .tiptap h3 { font-size: var(--text-base); margin: 1em 0 0.5em; }
-.note-editor__tiptap .tiptap p { margin: 0.25em 0; }
+.note-editor__tiptap .tiptap h1 {
+  font-size: var(--text-lg);
+  margin: 1em 0 0.5em;
+}
+.note-editor__tiptap .tiptap h2 {
+  font-size: var(--text-md);
+  margin: 1em 0 0.5em;
+}
+.note-editor__tiptap .tiptap h3 {
+  font-size: var(--text-base);
+  margin: 1em 0 0.5em;
+}
+.note-editor__tiptap .tiptap p {
+  margin: 0.25em 0;
+}
 
 .note-editor__tiptap .tiptap ul,
 .note-editor__tiptap .tiptap ol {
@@ -683,7 +698,9 @@
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: color 150ms ease, background-color 150ms ease;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
 }
 
 .kanban-column__add-btn:hover {
@@ -828,8 +845,12 @@
    ======================================== */
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .note-list__spinner {

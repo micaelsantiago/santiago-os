@@ -1,9 +1,6 @@
 'use client'
 
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useDroppable } from '@dnd-kit/core'
 import { Plus } from 'lucide-react'
 
@@ -46,9 +43,7 @@ export function KanbanColumn({ column, tasks }: KanbanColumnProps) {
             <TaskCard key={task.id} task={task} />
           ))}
         </SortableContext>
-        {tasks.length === 0 && (
-          <div className="kanban-column__empty">Sem tarefas</div>
-        )}
+        {tasks.length === 0 && <div className="kanban-column__empty">Sem tarefas</div>}
       </div>
     </div>
   )

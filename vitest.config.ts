@@ -13,11 +13,7 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     coverage: {
       provider: 'v8',
-      include: [
-        'src/modules/**/types/**',
-        'src/modules/**/actions/**',
-        'src/lib/**',
-      ],
+      include: ['src/modules/**/types/**', 'src/modules/**/actions/**', 'src/lib/**'],
       exclude: [
         'src/lib/supabase/database.types.ts',
         'src/lib/supabase/middleware.ts',

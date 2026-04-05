@@ -121,11 +121,7 @@ export async function updateColumn(id: string, input: UpdateColumnInput) {
 export async function deleteColumn(id: string) {
   const { supabase, user } = await getAuthenticatedUser()
 
-  const { error } = await supabase
-    .from('columns')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', user.id)
+  const { error } = await supabase.from('columns').delete().eq('id', id).eq('user_id', user.id)
 
   if (error) return { error: 'Erro ao deletar coluna' }
   revalidatePath('/tasks')
@@ -211,11 +207,7 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
 export async function deleteTask(id: string) {
   const { supabase, user } = await getAuthenticatedUser()
 
-  const { error } = await supabase
-    .from('tasks')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', user.id)
+  const { error } = await supabase.from('tasks').delete().eq('id', id).eq('user_id', user.id)
 
   if (error) return { error: 'Erro ao deletar tarefa' }
   revalidatePath('/tasks')
@@ -247,9 +239,7 @@ export async function moveTask(input: MoveTaskInput) {
 export async function addTaskTag(taskId: string, tag: string) {
   const { supabase } = await getAuthenticatedUser()
 
-  const { error } = await supabase
-    .from('task_tags')
-    .insert({ task_id: taskId, tag })
+  const { error } = await supabase.from('task_tags').insert({ task_id: taskId, tag })
 
   if (error) return { error: 'Erro ao adicionar tag' }
   revalidatePath('/tasks')
@@ -259,11 +249,7 @@ export async function addTaskTag(taskId: string, tag: string) {
 export async function removeTaskTag(taskId: string, tag: string) {
   const { supabase } = await getAuthenticatedUser()
 
-  const { error } = await supabase
-    .from('task_tags')
-    .delete()
-    .eq('task_id', taskId)
-    .eq('tag', tag)
+  const { error } = await supabase.from('task_tags').delete().eq('task_id', taskId).eq('tag', tag)
 
   if (error) return { error: 'Erro ao remover tag' }
   revalidatePath('/tasks')

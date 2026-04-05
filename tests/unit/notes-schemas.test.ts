@@ -69,7 +69,12 @@ describe('noteFolderSchema', () => {
   })
 
   it('usa default para position', () => {
-    const result = noteFolderSchema.safeParse({ id: uuid, user_id: uuid, parent_id: null, title: 'Test' })
+    const result = noteFolderSchema.safeParse({
+      id: uuid,
+      user_id: uuid,
+      parent_id: null,
+      title: 'Test',
+    })
     expect(result.success).toBe(true)
     if (result.success) expect(result.data.position).toBe(0)
   })

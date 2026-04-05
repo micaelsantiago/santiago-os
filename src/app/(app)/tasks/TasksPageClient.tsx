@@ -15,9 +15,7 @@ function TasksPageInner() {
 
   const tasksQuery = useQuery(boardTasksQueryOptions(boardId ?? ''))
   const tasks: Task[] =
-    tasksQuery.data && 'success' in tasksQuery.data
-      ? (tasksQuery.data.data ?? [])
-      : []
+    tasksQuery.data && 'success' in tasksQuery.data ? (tasksQuery.data.data ?? []) : []
 
   return (
     <div className="tasks-page">

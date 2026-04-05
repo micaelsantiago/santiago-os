@@ -31,14 +31,9 @@ function formatDueDate(dateStr: string): string {
 
 export function TaskCard({ task }: TaskCardProps) {
   const setEditingTaskId = useTaskStore((s) => s.setEditingTaskId)
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id })
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: task.id,
+  })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -56,22 +51,14 @@ export function TaskCard({ task }: TaskCardProps) {
       onClick={() => setEditingTaskId(task.id)}
     >
       <div className="task-card__header">
-        <button
-          className="task-card__drag-handle"
-          {...attributes}
-          {...listeners}
-        >
+        <button className="task-card__drag-handle" {...attributes} {...listeners}>
           <GripVertical size={14} strokeWidth={1.5} />
         </button>
-        <span className={`task-card__priority ${priority.className}`}>
-          {priority.label}
-        </span>
+        <span className={`task-card__priority ${priority.className}`}>{priority.label}</span>
       </div>
       <p className="task-card__title">{task.title}</p>
       {task.due_date && (
-        <div
-          className={`task-card__due-date ${isOverdue ? 'task-card__due-date--overdue' : ''}`}
-        >
+        <div className={`task-card__due-date ${isOverdue ? 'task-card__due-date--overdue' : ''}`}>
           <Calendar size={12} strokeWidth={1.5} />
           <span>{formatDueDate(task.due_date)}</span>
         </div>

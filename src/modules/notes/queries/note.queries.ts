@@ -1,10 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import {
-  getFolders,
-  getNoteById,
-  getNotes,
-} from '@/modules/notes/actions/note.actions'
+import { getFolders, getNoteById, getNotes } from '@/modules/notes/actions/note.actions'
 
 export function notesQueryOptions(folderId?: string | null) {
   return queryOptions({

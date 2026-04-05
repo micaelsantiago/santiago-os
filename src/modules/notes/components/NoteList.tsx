@@ -31,15 +31,11 @@ function NoteItem({ note }: { note: Note }) {
       className={`note-list__item ${isSelected ? 'note-list__item--active' : ''}`}
     >
       <div className="note-list__item-header">
-        {note.is_pinned && (
-          <Pin size={12} strokeWidth={1.5} className="note-list__pin-icon" />
-        )}
+        {note.is_pinned && <Pin size={12} strokeWidth={1.5} className="note-list__pin-icon" />}
         <span className="note-list__item-title truncate">{note.title}</span>
       </div>
       {getPreview(note.content) && (
-        <span className="note-list__item-preview truncate">
-          {getPreview(note.content)}
-        </span>
+        <span className="note-list__item-preview truncate">{getPreview(note.content)}</span>
       )}
       <span className="note-list__item-date">{formatDate(note.updated_at)}</span>
     </button>
@@ -48,9 +44,7 @@ function NoteItem({ note }: { note: Note }) {
 
 export function NoteList() {
   const { selectedFolderId, searchQuery, setSearchQuery } = useNoteStore()
-  const { data: result, isLoading, isFetching } = useQuery(
-    notesQueryOptions(selectedFolderId),
-  )
+  const { data: result, isLoading, isFetching } = useQuery(notesQueryOptions(selectedFolderId))
 
   const notes = result?.success ? result.data : []
 

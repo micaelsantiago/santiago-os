@@ -36,9 +36,7 @@ export function TaskToolbar() {
           <button
             key={p.value}
             className={`task-priority-filter ${p.className} ${filterPriority === p.value ? 'task-priority-filter--active' : ''}`}
-            onClick={() =>
-              setFilterPriority(filterPriority === p.value ? null : p.value)
-            }
+            onClick={() => setFilterPriority(filterPriority === p.value ? null : p.value)}
           >
             {p.label}
           </button>

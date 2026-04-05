@@ -10,9 +10,20 @@ const resultQueue: MockResult[] = []
 
 function createChainableMock() {
   const methods = [
-    'from', 'select', 'insert', 'update', 'delete',
-    'eq', 'in', 'is', 'gte', 'lte',
-    'order', 'limit', 'range', 'single',
+    'from',
+    'select',
+    'insert',
+    'update',
+    'delete',
+    'eq',
+    'in',
+    'is',
+    'gte',
+    'lte',
+    'order',
+    'limit',
+    'range',
+    'single',
   ] as const
 
   const mock: Record<string, unknown> = {}
@@ -44,7 +55,7 @@ export function resetMocks() {
   resultQueue.length = 0
   for (const [key, value] of Object.entries(mockSupabaseClient)) {
     if (key !== 'then' && typeof value === 'function' && 'mockClear' in value) {
-      (value as vi.Mock).mockClear()
+      ;(value as vi.Mock).mockClear()
     }
   }
 }

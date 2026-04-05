@@ -14,15 +14,13 @@ interface NoteStoreActions {
   setSearchQuery: (query: string) => void
 }
 
-export const useNoteStore = create<NoteStoreState & NoteStoreActions>(
-  (set) => ({
-    selectedNoteId: null,
-    selectedFolderId: null,
-    isEditing: false,
-    searchQuery: '',
-    selectNote: (id) => set({ selectedNoteId: id }),
-    selectFolder: (id) => set({ selectedFolderId: id }),
-    setEditing: (editing) => set({ isEditing: editing }),
-    setSearchQuery: (query) => set({ searchQuery: query }),
-  })
-)
+export const useNoteStore = create<NoteStoreState & NoteStoreActions>((set) => ({
+  selectedNoteId: null,
+  selectedFolderId: null,
+  isEditing: false,
+  searchQuery: '',
+  selectNote: (id) => set({ selectedNoteId: id }),
+  selectFolder: (id) => set({ selectedFolderId: id }),
+  setEditing: (editing) => set({ isEditing: editing }),
+  setSearchQuery: (query) => set({ searchQuery: query }),
+}))

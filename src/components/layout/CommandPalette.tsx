@@ -70,9 +70,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         <Command className="palette__command">
           <CommandInput placeholder="Buscar comando..." />
           <CommandList className="palette__list">
-            <CommandEmpty className="palette__empty">
-              Nenhum resultado encontrado.
-            </CommandEmpty>
+            <CommandEmpty className="palette__empty">Nenhum resultado encontrado.</CommandEmpty>
 
             <CommandGroup heading="Navegar" className="palette__group">
               <CommandItem onSelect={() => navigate('/tasks')} className="palette__item">
@@ -108,11 +106,17 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             </CommandGroup>
 
             <CommandGroup heading="Criar" className="palette__group">
-              <CommandItem onSelect={() => navigate('/tasks?create=true')} className="palette__item">
+              <CommandItem
+                onSelect={() => navigate('/tasks?create=true')}
+                className="palette__item"
+              >
                 <Plus size={16} strokeWidth={1.5} />
                 <span>Nova tarefa</span>
               </CommandItem>
-              <CommandItem onSelect={() => navigate('/notes?create=true')} className="palette__item">
+              <CommandItem
+                onSelect={() => navigate('/notes?create=true')}
+                className="palette__item"
+              >
                 <StickyNote size={16} strokeWidth={1.5} />
                 <span>Nova nota</span>
               </CommandItem>
