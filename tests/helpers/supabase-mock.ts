@@ -69,6 +69,13 @@ vi.mock('@/lib/supabase/get-user', () => ({
     supabase: mockSupabaseClient,
     user: { id: 'test-user-id', email: 'test@test.com' },
   }),
+  getAuthenticatedUserWithRole: vi.fn().mockResolvedValue({
+    supabase: mockSupabaseClient,
+    user: { id: 'test-user-id', email: 'test@test.com' },
+    profile: { role: 'master', master_id: null },
+    effectiveUserId: 'test-user-id',
+    isMaster: true,
+  }),
 }))
 
 vi.mock('next/cache', () => ({

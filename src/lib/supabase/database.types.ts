@@ -76,6 +76,27 @@ export type Database = {
           },
         ]
       }
+      member_permissions: {
+        Row: {
+          id: string
+          member_id: string
+          module: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          member_id: string
+          module: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          member_id?: string
+          module?: string
+          created_at?: string | null
+        }
+        Relationships: []
+      }
       note_folders: {
         Row: {
           id: string
@@ -177,7 +198,9 @@ export type Database = {
           avatar_url: string | null
           created_at: string | null
           id: string
+          master_id: string | null
           name: string | null
+          role: string
           theme: string | null
           timezone: string | null
         }
@@ -185,7 +208,9 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           id: string
+          master_id?: string | null
           name?: string | null
+          role?: string
           theme?: string | null
           timezone?: string | null
         }
@@ -193,7 +218,9 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string | null
           id?: string
+          master_id?: string | null
           name?: string | null
+          role?: string
           theme?: string | null
           timezone?: string | null
         }

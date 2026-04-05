@@ -1,35 +1,31 @@
-'use client'
-
-import { useState, useCallback } from 'react'
-import { Sidebar } from '@/components/layout/Sidebar'
-import { Topbar } from '@/components/layout/Topbar'
-import { CommandPalette } from '@/components/layout/CommandPalette'
+import { getAuthenticatedUserWithRole } from '@/lib/supabase/get-user'
+import { ALL_MODULES } from '@/lib/rbac'
+import type { Module } from '@/lib/rbac'
+import { AppShell } from '@/components/layout/AppShell'
 
 interface AppLayoutProps {
   children: React.ReactNode
 }
 
-export function AppShell({ children }: AppLayoutProps) {
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+export default async function AppLayout({ children }: AppLayoutProps) {
+  const { supabase, user, isMaster } = await getAuthenticatedUserWithRole()
 
-  const handleOpenCommandPalette = useCallback(() => {
-    setCommandPaletteOpen(true)
-  }, [])
+  let allowedModules: Module[]
+
+  if (isMaster) {
+    allowedModules = [...ALL_MODULES]
+  } else {
+    const { data: permissions } = await supabase
+      .from('member_permissions')
+      .select('module')
+      .eq('member_id', user.id)
+
+    allowedModules = (permissions ?? []).map((p) => p.module) as Module[]
+  }
 
   return (
-    <div className="flex h-screen" style={{ fontFamily: 'var(--font)' }}>
-      <Sidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar onOpenCommandPalette={handleOpenCommandPalette} />
-        <main className="flex-1 overflow-auto p-4" style={{ backgroundColor: 'var(--color-bg-3)' }}>
-          {children}
-        </main>
-      </div>
-      <CommandPalette open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen} />
-    </div>
+    <AppShell allowedModules={allowedModules} isMaster={isMaster}>
+      {children}
+    </AppShell>
   )
-}
-
-export default function AppLayout({ children }: AppLayoutProps) {
-  return <AppShell>{children}</AppShell>
 }

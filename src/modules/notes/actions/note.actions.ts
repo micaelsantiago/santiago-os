@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
-import { getAuthenticatedUser } from '@/lib/supabase/get-user'
+import { getAuthenticatedUserWithRole } from '@/lib/supabase/get-user'
 
 const uuidParam = z.string().uuid()
 import {
@@ -20,7 +20,7 @@ import type {
 } from '@/modules/notes/types/note.types'
 
 export async function createNote(input: CreateNoteInput) {
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
   const parsed = createNoteSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
@@ -28,7 +28,7 @@ export async function createNote(input: CreateNoteInput) {
     .from('notes')
     .insert({
       ...parsed.data,
-      user_id: user.id,
+      user_id: effectiveUserId,
     })
     .select()
     .single()
@@ -40,7 +40,7 @@ export async function createNote(input: CreateNoteInput) {
 
 export async function updateNote(id: string, input: UpdateNoteInput) {
   if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
   const parsed = updateNoteSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
@@ -48,7 +48,7 @@ export async function updateNote(id: string, input: UpdateNoteInput) {
     .from('notes')
     .update(parsed.data)
     .eq('id', id)
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
     .select()
     .single()
 
@@ -59,9 +59,15 @@ export async function updateNote(id: string, input: UpdateNoteInput) {
 
 export async function deleteNote(id: string) {
   if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId, isMaster } = await getAuthenticatedUserWithRole()
 
-  const { error } = await supabase.from('notes').delete().eq('id', id).eq('user_id', user.id)
+  if (!isMaster) return { error: 'Membros não podem deletar recursos' }
+
+  const { error } = await supabase
+    .from('notes')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', effectiveUserId)
 
   if (error) return { error: 'Erro ao deletar nota' }
   revalidatePath('/notes')
@@ -69,12 +75,12 @@ export async function deleteNote(id: string) {
 }
 
 export async function getNotes(folderId?: string | null) {
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
 
   let query = supabase
     .from('notes')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
     .order('is_pinned', { ascending: false })
     .order('updated_at', { ascending: false })
 
@@ -94,13 +100,13 @@ export async function getNotes(folderId?: string | null) {
 
 export async function getNoteById(id: string) {
   if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
 
   const { data, error } = await supabase
     .from('notes')
     .select('*')
     .eq('id', id)
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
     .single()
 
   if (error) return { error: 'Erro ao buscar nota' }
@@ -108,7 +114,7 @@ export async function getNoteById(id: string) {
 }
 
 export async function createFolder(input: CreateFolderInput) {
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
   const parsed = createFolderSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
@@ -116,7 +122,7 @@ export async function createFolder(input: CreateFolderInput) {
     .from('note_folders')
     .insert({
       ...parsed.data,
-      user_id: user.id,
+      user_id: effectiveUserId,
     })
     .select()
     .single()
@@ -127,12 +133,12 @@ export async function createFolder(input: CreateFolderInput) {
 }
 
 export async function getFolders() {
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
 
   const { data, error } = await supabase
     .from('note_folders')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
     .order('position', { ascending: true })
 
   if (error) return { error: 'Erro ao buscar pastas' }
@@ -141,9 +147,15 @@ export async function getFolders() {
 
 export async function deleteFolder(id: string) {
   if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId, isMaster } = await getAuthenticatedUserWithRole()
 
-  const { error } = await supabase.from('note_folders').delete().eq('id', id).eq('user_id', user.id)
+  if (!isMaster) return { error: 'Membros não podem deletar recursos' }
+
+  const { error } = await supabase
+    .from('note_folders')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', effectiveUserId)
 
   if (error) return { error: 'Erro ao deletar pasta' }
   revalidatePath('/notes')

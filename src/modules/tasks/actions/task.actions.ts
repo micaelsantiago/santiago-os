@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
-import { getAuthenticatedUser } from '@/lib/supabase/get-user'
+import { getAuthenticatedUserWithRole } from '@/lib/supabase/get-user'
 import {
   createColumnSchema,
   createTaskSchema,
@@ -29,13 +29,13 @@ import type {
 // ========================================
 
 export async function getOrCreateDefaultBoard() {
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
 
   // Buscar board padrão do usuário
   const { data: existing, error: selectError } = await supabase
     .from('boards')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
     .eq('type', 'tasks')
     .limit(1)
     .single()
@@ -49,16 +49,16 @@ export async function getOrCreateDefaultBoard() {
 
   const { data: board, error: boardError } = await supabase
     .from('boards')
-    .insert({ title: 'Minhas Tarefas', type: 'tasks', user_id: user.id })
+    .insert({ title: 'Minhas Tarefas', type: 'tasks', user_id: effectiveUserId })
     .select()
     .single()
 
   if (boardError || !board) return { error: 'Erro ao criar board' }
 
   const defaultColumns = [
-    { board_id: board.id, user_id: user.id, title: 'Backlog', position: 0 },
-    { board_id: board.id, user_id: user.id, title: 'Em progresso', position: 1 },
-    { board_id: board.id, user_id: user.id, title: 'Concluído', position: 2 },
+    { board_id: board.id, user_id: effectiveUserId, title: 'Backlog', position: 0 },
+    { board_id: board.id, user_id: effectiveUserId, title: 'Em progresso', position: 1 },
+    { board_id: board.id, user_id: effectiveUserId, title: 'Concluído', position: 2 },
   ]
 
   const { error: colError } = await supabase.from('columns').insert(defaultColumns)
@@ -75,13 +75,13 @@ export async function getOrCreateDefaultBoard() {
 
 export async function getColumns(boardId: string) {
   if (!uuidParam.safeParse(boardId).success) return { error: 'ID inválido' }
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
 
   const { data, error } = await supabase
     .from('columns')
     .select('*')
     .eq('board_id', boardId)
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
     .order('position', { ascending: true })
 
   if (error) return { error: 'Erro ao buscar colunas' }
@@ -89,13 +89,13 @@ export async function getColumns(boardId: string) {
 }
 
 export async function createColumn(input: CreateColumnInput) {
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
   const parsed = createColumnSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
   const { data, error } = await supabase
     .from('columns')
-    .insert({ ...parsed.data, user_id: user.id })
+    .insert({ ...parsed.data, user_id: effectiveUserId })
     .select()
     .single()
 
@@ -106,7 +106,7 @@ export async function createColumn(input: CreateColumnInput) {
 
 export async function updateColumn(id: string, input: UpdateColumnInput) {
   if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
   const parsed = updateColumnSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
@@ -114,7 +114,7 @@ export async function updateColumn(id: string, input: UpdateColumnInput) {
     .from('columns')
     .update(parsed.data)
     .eq('id', id)
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
     .select()
     .single()
 
@@ -125,9 +125,15 @@ export async function updateColumn(id: string, input: UpdateColumnInput) {
 
 export async function deleteColumn(id: string) {
   if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId, isMaster } = await getAuthenticatedUserWithRole()
 
-  const { error } = await supabase.from('columns').delete().eq('id', id).eq('user_id', user.id)
+  if (!isMaster) return { error: 'Membros não podem deletar recursos' }
+
+  const { error } = await supabase
+    .from('columns')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', effectiveUserId)
 
   if (error) return { error: 'Erro ao deletar coluna' }
   revalidatePath('/tasks')
@@ -140,14 +146,14 @@ export async function deleteColumn(id: string) {
 
 export async function getBoardTasks(boardId: string) {
   if (!uuidParam.safeParse(boardId).success) return { error: 'ID inválido' }
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
 
   // Buscar todas tasks do board via columns
   const { data: columns } = await supabase
     .from('columns')
     .select('id')
     .eq('board_id', boardId)
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
 
   if (!columns || columns.length === 0) {
     return { success: true, data: [] as Task[] }
@@ -158,7 +164,7 @@ export async function getBoardTasks(boardId: string) {
   const { data, error } = await supabase
     .from('tasks')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
     .in('column_id', columnIds)
     .order('position', { ascending: true })
 
@@ -167,7 +173,7 @@ export async function getBoardTasks(boardId: string) {
 }
 
 export async function createTask(input: CreateTaskInput) {
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
   const parsed = createTaskSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
@@ -176,13 +182,13 @@ export async function createTask(input: CreateTaskInput) {
     .from('tasks')
     .select('*', { count: 'exact', head: true })
     .eq('column_id', parsed.data.column_id)
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
 
   const { data, error } = await supabase
     .from('tasks')
     .insert({
       ...parsed.data,
-      user_id: user.id,
+      user_id: effectiveUserId,
       position: count ?? 0,
     })
     .select()
@@ -195,7 +201,7 @@ export async function createTask(input: CreateTaskInput) {
 
 export async function updateTask(id: string, input: UpdateTaskInput) {
   if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
   const parsed = updateTaskSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
@@ -203,7 +209,7 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
     .from('tasks')
     .update(parsed.data)
     .eq('id', id)
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
     .select()
     .single()
 
@@ -214,9 +220,15 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
 
 export async function deleteTask(id: string) {
   if (!uuidParam.safeParse(id).success) return { error: 'ID inválido' }
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId, isMaster } = await getAuthenticatedUserWithRole()
 
-  const { error } = await supabase.from('tasks').delete().eq('id', id).eq('user_id', user.id)
+  if (!isMaster) return { error: 'Membros não podem deletar recursos' }
+
+  const { error } = await supabase
+    .from('tasks')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', effectiveUserId)
 
   if (error) return { error: 'Erro ao deletar tarefa' }
   revalidatePath('/tasks')
@@ -224,7 +236,7 @@ export async function deleteTask(id: string) {
 }
 
 export async function moveTask(input: MoveTaskInput) {
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
   const parsed = moveTaskSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.flatten() }
 
@@ -235,7 +247,7 @@ export async function moveTask(input: MoveTaskInput) {
     .from('columns')
     .select('id')
     .eq('id', columnId)
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
     .single()
 
   if (!column) return { error: 'Coluna não encontrada' }
@@ -244,7 +256,7 @@ export async function moveTask(input: MoveTaskInput) {
     .from('tasks')
     .update({ column_id: columnId, position })
     .eq('id', taskId)
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
 
   if (error) return { error: 'Erro ao mover tarefa' }
   revalidatePath('/tasks')
@@ -257,14 +269,14 @@ export async function moveTask(input: MoveTaskInput) {
 
 export async function addTaskTag(taskId: string, tag: string) {
   if (!uuidParam.safeParse(taskId).success) return { error: 'ID inválido' }
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId } = await getAuthenticatedUserWithRole()
 
   // Verificar ownership da task antes de adicionar tag
   const { data: task } = await supabase
     .from('tasks')
     .select('id')
     .eq('id', taskId)
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
     .single()
 
   if (!task) return { error: 'Tarefa não encontrada' }
@@ -278,14 +290,16 @@ export async function addTaskTag(taskId: string, tag: string) {
 
 export async function removeTaskTag(taskId: string, tag: string) {
   if (!uuidParam.safeParse(taskId).success) return { error: 'ID inválido' }
-  const { supabase, user } = await getAuthenticatedUser()
+  const { supabase, effectiveUserId, isMaster } = await getAuthenticatedUserWithRole()
+
+  if (!isMaster) return { error: 'Membros não podem remover tags' }
 
   // Verificar ownership da task antes de remover tag
   const { data: task } = await supabase
     .from('tasks')
     .select('id')
     .eq('id', taskId)
-    .eq('user_id', user.id)
+    .eq('user_id', effectiveUserId)
     .single()
 
   if (!task) return { error: 'Tarefa não encontrada' }
