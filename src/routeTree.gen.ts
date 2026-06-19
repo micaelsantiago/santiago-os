@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FinancasIndexRouteImport } from './routes/financas/index'
+import { Route as FinancasCategoriasRouteImport } from './routes/financas/categorias'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -28,35 +30,64 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FinancasIndexRoute = FinancasIndexRouteImport.update({
+  id: '/financas/',
+  path: '/financas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinancasCategoriasRoute = FinancasCategoriasRouteImport.update({
+  id: '/financas/categorias',
+  path: '/financas/categorias',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/financas/categorias': typeof FinancasCategoriasRoute
+  '/financas/': typeof FinancasIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/financas/categorias': typeof FinancasCategoriasRoute
+  '/financas': typeof FinancasIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/financas/categorias': typeof FinancasCategoriasRoute
+  '/financas/': typeof FinancasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/reset-password'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/reset-password'
+    | '/financas/categorias'
+    | '/financas/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/reset-password'
-  id: '__root__' | '/' | '/login' | '/reset-password'
+  to: '/' | '/login' | '/reset-password' | '/financas/categorias' | '/financas'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/reset-password'
+    | '/financas/categorias'
+    | '/financas/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  FinancasCategoriasRoute: typeof FinancasCategoriasRoute
+  FinancasIndexRoute: typeof FinancasIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +113,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/financas/': {
+      id: '/financas/'
+      path: '/financas'
+      fullPath: '/financas/'
+      preLoaderRoute: typeof FinancasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/financas/categorias': {
+      id: '/financas/categorias'
+      path: '/financas/categorias'
+      fullPath: '/financas/categorias'
+      preLoaderRoute: typeof FinancasCategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +134,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  FinancasCategoriasRoute: FinancasCategoriasRoute,
+  FinancasIndexRoute: FinancasIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

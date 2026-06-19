@@ -8,6 +8,7 @@ import {
 	Settings,
 	ShoppingCart,
 	Users,
+	Wallet,
 	X,
 } from "lucide-react";
 import { useState } from "react";
@@ -16,7 +17,7 @@ import { useAuth } from "../lib/auth";
 interface NavLink {
 	label: string;
 	icon: React.ComponentType<{ size?: number }>;
-	to: "/";
+	to: string;
 }
 
 interface NavPlaceholder {
@@ -26,6 +27,7 @@ interface NavPlaceholder {
 
 const primaryNav: NavLink[] = [
 	{ to: "/", label: "Início", icon: LayoutDashboard },
+	{ to: "/financas", label: "Financeiro", icon: Wallet },
 ];
 
 const secondaryNav: NavPlaceholder[] = [
