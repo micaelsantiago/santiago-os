@@ -8,24 +8,22 @@ function Dashboard() {
 
 	if (isLoading) {
 		return (
-			<main className="flex min-h-screen items-center justify-center bg-[var(--bg)]">
+			<div className="flex flex-1 items-center justify-center">
 				<p className="text-sm text-[var(--text-soft)]">Carregando...</p>
-			</main>
+			</div>
 		);
 	}
 
 	return (
-		<main className="flex min-h-screen flex-col items-center justify-center bg-[var(--bg)] px-4">
+		<div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
 			<div className="text-center">
 				<h1 className="text-2xl font-bold tracking-tight text-[var(--text)]">
 					Bem vindo
 				</h1>
 				{user && (
-					<p className="mt-2 text-sm text-[var(--text-soft)]">
-						{user.email}
-					</p>
+					<p className="mt-2 text-sm text-[var(--text-soft)]">{user.email}</p>
 				)}
 			</div>
-		</main>
+		</div>
 	);
 }

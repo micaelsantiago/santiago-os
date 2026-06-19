@@ -1,6 +1,14 @@
-import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+	createRootRoute,
+	HeadContent,
+	Scripts,
+	useLocation,
+	useNavigate,
+} from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Toaster } from "sonner";
-import { AuthProvider } from "../lib/auth";
+import Sidebar from "../components/Sidebar";
+import { AuthProvider, useAuth } from "../lib/auth";
 
 import appCss from "../styles.css?url";
 
@@ -39,15 +47,47 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body className="font-sans antialiased">
 				<AuthProvider>
-					{children}
+					<Shell>{children}</Shell>
 				</AuthProvider>
-				<Toaster
-					position="bottom-right"
-					richColors
-					closeButton
-				/>
+				<Toaster position="bottom-right" richColors closeButton />
 				<Scripts />
 			</body>
 		</html>
+	);
+}
+
+function Shell({ children }: { children: React.ReactNode }) {
+	const location = useLocation();
+	const { user, isLoading } = useAuth();
+	const navigate = useNavigate();
+
+	const isPublicRoute =
+		location.pathname === "/login" || location.pathname === "/reset-password";
+
+	useEffect(() => {
+		if (!isLoading && !user && !isPublicRoute) {
+			navigate({ to: "/login" });
+		}
+	}, [isLoading, user, isPublicRoute, navigate]);
+
+	if (!isPublicRoute && (isLoading || !user)) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-[var(--bg)]">
+				<p className="text-sm text-[var(--text-soft)]">Carregando...</p>
+			</div>
+		);
+	}
+
+	if (isPublicRoute) {
+		return <>{children}</>;
+	}
+
+	return (
+		<div className="flex min-h-screen">
+			<Sidebar />
+			<div className="flex min-h-screen flex-1 flex-col lg:pl-60">
+				{children}
+			</div>
+		</div>
 	);
 }
