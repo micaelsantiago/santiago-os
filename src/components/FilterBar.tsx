@@ -10,13 +10,27 @@ export default function FilterBar({
 	month: number;
 	year: number;
 	categoryIds: string[];
-	onChange: (filters: { month: number; year: number; categoryIds: string[] }) => void;
+	onChange: (filters: {
+		month: number;
+		year: number;
+		categoryIds: string[];
+	}) => void;
 }) {
 	const [categories, setCategories] = useState<Category[]>([]);
 
 	const months = [
-		"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-		"Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+		"Janeiro",
+		"Fevereiro",
+		"Março",
+		"Abril",
+		"Maio",
+		"Junho",
+		"Julho",
+		"Agosto",
+		"Setembro",
+		"Outubro",
+		"Novembro",
+		"Dezembro",
 	];
 
 	const currentYear = new Date().getFullYear();
@@ -37,7 +51,9 @@ export default function FilterBar({
 		<div className="flex flex-wrap items-center gap-3">
 			<select
 				value={month}
-				onChange={(e) => onChange({ month: Number(e.target.value), year, categoryIds })}
+				onChange={(e) =>
+					onChange({ month: Number(e.target.value), year, categoryIds })
+				}
 				className="rounded-lg border border-[var(--line)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text)] focus:border-[var(--accent)] focus:outline-none"
 			>
 				{months.map((name, i) => (
@@ -49,7 +65,9 @@ export default function FilterBar({
 
 			<select
 				value={year}
-				onChange={(e) => onChange({ month, year: Number(e.target.value), categoryIds })}
+				onChange={(e) =>
+					onChange({ month, year: Number(e.target.value), categoryIds })
+				}
 				className="rounded-lg border border-[var(--line)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text)] focus:border-[var(--accent)] focus:outline-none"
 			>
 				{years.map((y) => (

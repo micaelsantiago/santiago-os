@@ -1,12 +1,23 @@
-import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+	createFileRoute,
+	useNavigate,
+	useSearch,
+} from "@tanstack/react-router";
+import { useCallback, useEffect, useState } from "react";
 import BalanceSummary from "../../components/BalanceSummary";
+import DailyPredictability from "../../components/DailyPredictability";
+import DailyView from "../../components/DailyView";
 import FilterBar from "../../components/FilterBar";
-import MonthlyOverview from "../../components/MonthlyOverview";
 import TransactionForm from "../../components/TransactionForm";
-import TransactionList from "../../components/TransactionList";
-import { getCurrentMonth, getCurrentYear, getMonthDateRange, formatMonthYear } from "../../lib/format";
+import {
+	formatMonthYear,
+	getCurrentMonth,
+	getCurrentYear,
+	getMonthDateRange,
+	getMonthState,
+} from "../../lib/format";
 import { supabase } from "../../lib/supabase";
+import type { DayTransaction, RecurringTransaction } from "../../lib/types";
 
 interface Transaction {
 	id: string;
@@ -20,17 +31,6 @@ interface Transaction {
 		color: string;
 	} | null;
 }
-
-interface CategoryTotal {
-	id: string;
-	name: string;
-	icon: string;
-	color: string;
-	total: number;
-	percentage: number;
-}
-
-const PAGE_SIZE = 20;
 
 function parseSearchParams(search: Record<string, string>) {
 	return {
@@ -55,12 +55,17 @@ function FinancasPage() {
 	const [categoryIds, setCategoryIds] = useState<string[]>(params.categoria);
 
 	const [transactions, setTransactions] = useState<Transaction[]>([]);
+	const [saldoInicial, setSaldoInicial] = useState(0);
+	const [recurringTransactions, setRecurringTransactions] = useState<
+		RecurringTransaction[]
+	>([]);
 	const [loading, setLoading] = useState(true);
-	const [hasMore, setHasMore] = useState(false);
-	const [page, setPage] = useState(0);
 	const [showModal, setShowModal] = useState(false);
 
 	const periodLabel = formatMonthYear(month, year);
+	const monthState = getMonthState(month, year);
+	const today = new Date();
+	const todayDay = today.getDate();
 
 	const totalIncome = transactions
 		.filter((tx) => tx.type === "income")
@@ -72,84 +77,75 @@ function FinancasPage() {
 
 	const saldo = totalIncome - totalExpense;
 
-	const expenseCategories = buildCategoryTotals(
-		transactions.filter((tx) => tx.type === "expense"),
-		totalExpense
-	);
+	const diasRestantes =
+		monthState === "current"
+			? new Date(year, month, 0).getDate() - todayDay
+			: 0;
 
-	function buildCategoryTotals(txs: Transaction[], total: number): CategoryTotal[] {
-		const map = new Map<string, CategoryTotal>();
-
-		for (const tx of txs) {
-			const key = tx.categories?.name ?? "sem-categoria";
-			const existing = map.get(key);
-			if (existing) {
-				existing.total += tx.amount;
-			} else {
-				map.set(key, {
-					id: key,
-					name: tx.categories?.name ?? "Sem categoria",
-					icon: tx.categories?.icon ?? "📁",
-					color: tx.categories?.color ?? "#6b7280",
-					total: tx.amount,
-					percentage: 0,
-				});
-			}
-		}
-
-		const result = Array.from(map.values()).sort((a, b) => b.total - a.total);
-		for (const cat of result) {
-			cat.percentage = total > 0 ? Math.round((cat.total / total) * 100) : 0;
-		}
-
-		return result;
-	}
-
-	const pageRef = useRef(0);
-
-	const loadTransactions = useCallback(async (reset: boolean) => {
+	const loadData = useCallback(async () => {
 		setLoading(true);
 
 		const { startDate, endDate } = getMonthDateRange(month, year);
 
-		let query = supabase
+		const txQuery = supabase
 			.from("transactions")
-			.select("id, type, amount, date, description, categories(name, icon, color)")
+			.select(
+				"id, type, amount, date, description, categories(name, icon, color)",
+			)
 			.gte("date", startDate)
 			.lte("date", endDate)
-			.order("date", { ascending: false })
-			.order("created_at", { ascending: false });
+			.order("date", { ascending: true });
 
-		if (categoryIds.length > 0) {
-			query = query.in("category_id", categoryIds);
+		const finalTxQuery =
+			categoryIds.length > 0 ? txQuery.in("category_id", categoryIds) : txQuery;
+
+		const [txResult, histResult, recResult] = await Promise.all([
+			finalTxQuery,
+			supabase
+				.from("transactions")
+				.select("type, amount")
+				.lt("date", startDate),
+			supabase
+				.from("recurring_transactions")
+				.select("id, name, amount, day_of_month, categories(name, icon, color)")
+				.eq("active", true)
+				.order("day_of_month", { ascending: true }),
+		]);
+
+		if (!txResult.error && txResult.data) {
+			setTransactions(txResult.data as unknown as Transaction[]);
 		}
 
-		const currentPage = reset ? 0 : pageRef.current;
-		const from = currentPage * PAGE_SIZE;
-		const to = from + PAGE_SIZE - 1;
+		if (!histResult.error && histResult.data) {
+			const histData = histResult.data as { type: string; amount: number }[];
+			const initial = histData.reduce((acc, t) => {
+				return t.type === "income" ? acc + t.amount : acc - t.amount;
+			}, 0) as unknown as number;
+			setSaldoInicial(initial);
+		}
 
-		const response = await query.range(from, to);
-		const data = response.data as Transaction[] | null;
-
-		if (!response.error && data) {
-			if (reset) {
-				setTransactions(data);
-			} else {
-				setTransactions((prev) => [...prev, ...data]);
-			}
-			setHasMore(data.length === PAGE_SIZE);
+		if (!recResult.error && recResult.data) {
+			const recs = recResult.data as unknown as RecurringTransaction[];
+			const futureRecs = recs.filter(
+				(r) =>
+					r.day_of_month > todayDay &&
+					r.day_of_month <= new Date(year, month, 0).getDate(),
+			);
+			setRecurringTransactions(futureRecs);
 		}
 
 		setLoading(false);
-	}, [month, year, categoryIds]);
+	}, [month, year, categoryIds, todayDay]);
 
 	useEffect(() => {
-		setPage(0);
-		pageRef.current = 0;
-		loadTransactions(true);
-	}, [loadTransactions]);
+		loadData();
+	}, [loadData]);
 
-	function handleFilterChange(filters: { month: number; year: number; categoryIds: string[] }) {
+	function handleFilterChange(filters: {
+		month: number;
+		year: number;
+		categoryIds: string[];
+	}) {
 		setMonth(filters.month);
 		setYear(filters.year);
 		setCategoryIds(filters.categoryIds);
@@ -165,29 +161,21 @@ function FinancasPage() {
 		});
 	}
 
-	function handleLoadMore() {
-		setPage((p) => {
-			pageRef.current = p + 1;
-			return p + 1;
-		});
-	}
-
-	useEffect(() => {
-		if (page > 0) loadTransactions(false);
-	}, [loadTransactions, page]);
-
-	function handleDelete() {
-		setPage(0);
-		pageRef.current = 0;
-		loadTransactions(true);
-	}
-
 	function handleModalSuccess() {
 		setShowModal(false);
-		setPage(0);
-		pageRef.current = 0;
-		loadTransactions(true);
+		loadData();
 	}
+
+	const dayTransactions: DayTransaction[] = transactions.map((tx) => ({
+		id: tx.id,
+		type: tx.type,
+		amount: tx.amount,
+		date: tx.date,
+		description: tx.description,
+		categories: tx.categories,
+	}));
+
+	const showPredictability = monthState === "current";
 
 	return (
 		<div className="w-full space-y-6 px-4 py-6 lg:px-8">
@@ -216,20 +204,26 @@ function FinancasPage() {
 				periodLabel={periodLabel}
 			/>
 
-			<MonthlyOverview
-				categories={expenseCategories}
-			/>
-
-			<div className="border-t border-[var(--line)] pt-4">
-				<h2 className="mb-3 text-sm font-semibold text-[var(--text)]">Transações</h2>
-				<TransactionList
-					transactions={transactions}
-					loading={loading}
-					hasMore={hasMore}
-					onLoadMore={handleLoadMore}
-					onDelete={handleDelete}
+			{showPredictability && (
+				<DailyPredictability
+					saldoHistorico={saldoInicial + saldo}
+					recurringTransactions={recurringTransactions}
+					diasRestantes={diasRestantes}
 				/>
-			</div>
+			)}
+
+			{loading ? (
+				<div className="flex items-center justify-center py-12">
+					<div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
+				</div>
+			) : (
+				<DailyView
+					transactions={dayTransactions}
+					saldoInicial={saldoInicial}
+					month={month}
+					year={year}
+				/>
+			)}
 
 			{showModal && (
 				<div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto pt-[10vh]">
